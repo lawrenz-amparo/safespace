@@ -2,85 +2,47 @@
 (function() {
     'use strict';
 
-    // Relationship options for Student victims
-    const STUDENT_OPTIONS = [
-        { value: "classmate", text: "Classmate" },
-        { value: "orgmate", text: "Organization Mate" },
-        { value: "student_to_faculty", text: "Student to faculty/staff" },
-        { value: "stranger", text: "Stranger" },
-        { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
-        { value: "authority", text: "With authority, influence, or moral ascendancy over victim" }
+    // Static relationship options (same for all complainants)
+    const RELATIONSHIP_OPTIONS = [
+        { value: "student", text: "student" },
+        { value: "professor", text: "professor" },
+        { value: "colleague", text: "colleague" },
+        { value: "classmate", text: "classmate" },
+        { value: "orgmate", text: "orgmate" },
+        { value: "friend", text: "friend" },
+        { value: "outsider/stranger", text: "outsider/stranger" },
+        { value: "with moral ascendancy", text: "with moral ascendancy" },
+        { value: "with intimate", text: "with intimate" }
     ];
 
-    // Relationship options for Non-Student victims (faculty, staff, etc.)
-    const NON_STUDENT_OPTIONS = [
-        { value: "same-level", text: "Same level / Colleague" },
-        { value: "staff_to_supervisor", text: "Staff to immediate supervisor/boss" },
-        { value: "faculty_to_student", text: "Faculty/Staff to Student" },   // NEW
-        { value: "authority", text: "With authority, influence, or moral ascendancy over victim" },
-        { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
-        { value: "none", text: "No specific relationship" },
-        { value: "stranger", text: "Stranger" }
+    // Static respondent classification options (same for all complainants)
+    const RESPONDENT_OPTIONS = [
+        { value: "Student", text: "Student" },
+        { value: "instructor/professor", text: "instructor/professor" },
+        { value: "non-teaching personnel (admin & reps)", text: "non-teaching personnel (admin & reps)" },
+        { value: "Alumni", text: "Alumni" },
+        { value: "non-UP/outsider", text: "non-UP/outsider" }
     ];
-
-    // Complained classification options based on victim type
-    const COMPLAINED_OPTIONS = {
-        student: [
-            { value: "Student", text: "Student" },
-            { value: "Professor", text: "Professor" },
-            { value: "Instructor", text: "Instructor" },
-            { value: "Teacher", text: "Teacher" },
-            { value: "Gov't Employee", text: "Gov't Employee" },
-            { value: "Stranger", text: "Stranger" }
-        ],
-        nonStudent: [
-            { value: "Co-worker", text: "Co-worker" },
-            { value: "Colleague", text: "Colleague" },
-            { value: "Gov't Employee", text: "Gov't Employee" },
-            { value: "Student", text: "Student" },
-            { value: "Stranger", text: "Stranger" }
-        ]
-    };
 
     // Cache DOM elements
-    let victimSelect = null;
+    let victimSelect = null;      // complainant classification
     let relationshipSelect = null;
-    let perpSelect = null;
+    let perpSelect = null;        // respondent classification
 
     /**
-     * Update relationship dropdown options based on victim classification
+     * Populate relationship dropdown with static options
      */
     function updateRelationshipOptions() {
-        if (!victimSelect || !relationshipSelect) return;
-
-        const selectedVictim = victimSelect.value;
-        
+        if (!relationshipSelect) return;
         relationshipSelect.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = "";
+        placeholder.textContent = "— Select relationship —";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        relationshipSelect.appendChild(placeholder);
         
-        let optionsToUse = [];
-        
-        if (selectedVictim === 'Student') {
-            optionsToUse = STUDENT_OPTIONS;
-        } else if (selectedVictim && selectedVictim !== '') {
-            optionsToUse = NON_STUDENT_OPTIONS;
-        } else {
-            const placeholder = document.createElement('option');
-            placeholder.value = "";
-            placeholder.textContent = "— Select relationship —";
-            placeholder.disabled = true;
-            placeholder.selected = true;
-            relationshipSelect.appendChild(placeholder);
-            return;
-        }
-        
-        const placeholderOpt = document.createElement('option');
-        placeholderOpt.value = "";
-        placeholderOpt.textContent = "— Select relationship —";
-        placeholderOpt.disabled = true;
-        placeholderOpt.selected = true;
-        relationshipSelect.appendChild(placeholderOpt);
-        
-        optionsToUse.forEach(opt => {
+        RELATIONSHIP_OPTIONS.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
             option.textContent = opt.text;
@@ -88,53 +50,33 @@
         });
         
         const event = new CustomEvent('relationshipOptionsUpdated', { 
-            detail: { victimType: selectedVictim, optionsCount: optionsToUse.length }
+            detail: { optionsCount: RELATIONSHIP_OPTIONS.length }
         });
         document.dispatchEvent(event);
     }
 
     /**
-     * Update complained classification dropdown based on victim classification
+     * Populate respondent classification dropdown with static options
      */
-    function updateComplainedOptions() {
-        if (!victimSelect || !perpSelect) return;
-
-        const selectedVictim = victimSelect.value;
-        
+    function updateRespondentOptions() {
+        if (!perpSelect) return;
         perpSelect.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = "";
+        placeholder.textContent = "— Select category —";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        perpSelect.appendChild(placeholder);
         
-        let optionsToUse = [];
-        
-        if (selectedVictim === 'Student') {
-            optionsToUse = COMPLAINED_OPTIONS.student;
-        } else if (selectedVictim && selectedVictim !== '') {
-            optionsToUse = COMPLAINED_OPTIONS.nonStudent;
-        } else {
-            const placeholder = document.createElement('option');
-            placeholder.value = "";
-            placeholder.textContent = "— Select category —";
-            placeholder.disabled = true;
-            placeholder.selected = true;
-            perpSelect.appendChild(placeholder);
-            return;
-        }
-        
-        const placeholderOpt = document.createElement('option');
-        placeholderOpt.value = "";
-        placeholderOpt.textContent = "— Select category —";
-        placeholderOpt.disabled = true;
-        placeholderOpt.selected = true;
-        perpSelect.appendChild(placeholderOpt);
-        
-        optionsToUse.forEach(opt => {
+        RESPONDENT_OPTIONS.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
             option.textContent = opt.text;
             perpSelect.appendChild(option);
         });
         
-        const event = new CustomEvent('complainedOptionsUpdated', { 
-            detail: { victimType: selectedVictim, optionsCount: optionsToUse.length }
+        const event = new CustomEvent('respondentOptionsUpdated', { 
+            detail: { optionsCount: RESPONDENT_OPTIONS.length }
         });
         document.dispatchEvent(event);
     }
@@ -150,7 +92,7 @@
         relationshipSelect.appendChild(placeholder);
     }
 
-    function resetComplainedDropdown() {
+    function resetRespondentDropdown() {
         if (!perpSelect) return;
         perpSelect.innerHTML = '';
         const placeholder = document.createElement('option');
@@ -183,25 +125,20 @@
             return;
         }
         
+        // Initialize dropdowns with static options
         resetRelationshipDropdown();
-        resetComplainedDropdown();
+        updateRelationshipOptions();
+        resetRespondentDropdown();
+        updateRespondentOptions();
         
+        // No need to listen for victimSelect changes because options are static,
+        // but we keep a change listener to notify other components if needed.
         victimSelect.addEventListener('change', function() {
-            updateRelationshipOptions();
-            updateComplainedOptions();
+            const event = new CustomEvent('victimClassChanged', { detail: { value: victimSelect.value } });
+            document.dispatchEvent(event);
         });
         
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                    updateRelationshipOptions();
-                    updateComplainedOptions();
-                }
-            });
-        });
-        observer.observe(victimSelect, { attributes: true });
-        
-        console.log('Relationship Manager initialized');
+        console.log('Relationship Manager initialized with static options');
     }
 
     window.RelationshipManager = {
@@ -211,11 +148,13 @@
         getCurrentComplainedClass: getCurrentComplainedClass,
         resetDropdowns: function() {
             resetRelationshipDropdown();
-            resetComplainedDropdown();
+            updateRelationshipOptions();
+            resetRespondentDropdown();
+            updateRespondentOptions();
         },
         updateOptions: function() {
             updateRelationshipOptions();
-            updateComplainedOptions();
+            updateRespondentOptions();
         }
     };
 

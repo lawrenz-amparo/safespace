@@ -128,14 +128,16 @@
         document.getElementById('probPhyVal').innerHTML = formatProb(offenseProbs["Physical Harassment"] || 0);
         document.getElementById('probVerbVal').innerHTML = formatProb(offenseProbs["Verbal Harassment"] || 0);
         document.getElementById('probNonvVal').innerHTML = formatProb(offenseProbs["Non-Verbal Harassment"] || 0);
-        document.getElementById('probNotVal').innerHTML = formatProb(offenseProbs["Not Harassment"] || 0);
+        // CHANGED: "Not Harassment" -> "Not Sexual Harassment"
+        document.getElementById('probNotVal').innerHTML = formatProb(offenseProbs["Not Sexual Harassment"] || 0);
         document.getElementById('probCybVal').innerHTML = formatProb(offenseProbs["Cyber Sexual Harassment"] || 0);
         
         // Update progress bars
         document.getElementById('probPhyBar').style.width = (offenseProbs["Physical Harassment"] * 100) + '%';
         document.getElementById('probVerbBar').style.width = (offenseProbs["Verbal Harassment"] * 100) + '%';
         document.getElementById('probNonvBar').style.width = (offenseProbs["Non-Verbal Harassment"] * 100) + '%';
-        document.getElementById('probNotBar').style.width = (offenseProbs["Not Harassment"] * 100) + '%';
+        // CHANGED: "Not Harassment" -> "Not Sexual Harassment"
+        document.getElementById('probNotBar').style.width = (offenseProbs["Not Sexual Harassment"] * 100) + '%';
         document.getElementById('probCybBar').style.width = (offenseProbs["Cyber Sexual Harassment"] * 100) + '%';
         
         // Update description

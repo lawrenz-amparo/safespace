@@ -46,10 +46,17 @@ function formatDateTimeModal(isoDate, timeStr) {
 }
 
 function formatMode(mode) {
-    if (mode === 'in-person') return 'In-person';
-    if (mode === 'video') return 'Video call';
-    if (mode === 'phone') return 'Phone call';
-    return mode || '—';
+    const modes = {
+        'in-person': 'In-person',
+        'in-person-oash': 'In Person (OASH)',
+        'in-person-counseling': 'In Person (Counseling)',
+        'video-call-oash': 'Video Call OASH',
+        'video-call-counseling': 'Video Call Counseling',
+        'video': 'Video call',
+        'phone': 'Phone call',
+        'phone-call': 'Phone call'
+    };
+    return modes[mode] || mode || '—';
 }
 
 // Global state
@@ -166,7 +173,7 @@ async function updateAppointmentStatus(appointmentId, newStatus) {
         });
         const result = await response.json();
         if (response.ok && result.success) {
-            if (typeof toast !== 'undefined') toast.success('Status updated', `Changed to ${newStatus}`);
+            if (typeof toast !== 'undefined') toast.success('Status updated', `Changed to ${newStatus === 'rejected' ? 'Rescheduled' : newStatus}`);
             // Refresh the current page to get updated data
             fetchAppointments(currentPage);
             return true;
@@ -182,10 +189,7 @@ async function updateAppointmentStatus(appointmentId, newStatus) {
 
 // Apply filters with debounce
 function applyFilters() {
-    // Clear previous debounce timer
     if (debounceTimer) clearTimeout(debounceTimer);
-    
-    // Debounce search to avoid too many requests
     debounceTimer = setTimeout(() => {
         currentFilters = {
             search: document.getElementById('searchInput')?.value || '',
@@ -193,10 +197,9 @@ function applyFilters() {
             fromDate: document.getElementById('fromDate')?.value || '',
             toDate: document.getElementById('toDate')?.value || ''
         };
-        // Reset to page 1 when filters change
         currentPage = 1;
         fetchAppointments(1);
-    }, 500); // 500ms delay for search
+    }, 500);
 }
 
 // Clear all filters
@@ -236,7 +239,7 @@ function renderDesktop() {
                         <select class="status-select ${app.status}" data-appointment-id="${app.appointmentId}" onchange="handleStatusChange('${app.appointmentId}', this.value)">
                             <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="confirmed" ${app.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                            <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                            <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Reschedule</option>
                             <option value="completed" ${app.status === 'completed' ? 'selected' : ''}>Completed</option>
                         </select>
                     </td>
@@ -246,7 +249,6 @@ function renderDesktop() {
         }).join('');
     }
     
-    // Update pagination info
     const start = (currentPage - 1) * rowsPerPage + 1;
     const end = Math.min(start + rowsPerPage - 1, totalItems);
     document.getElementById('desktop-pagination-info').innerHTML = totalItems > 0 ? `Showing ${start}–${end} of ${totalItems}` : 'No results';
@@ -272,7 +274,7 @@ function renderMobile() {
                         <select class="status-select ${app.status}" onchange="handleStatusChange('${app.appointmentId}', this.value)">
                             <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="confirmed" ${app.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                            <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                            <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Reschedule</option>
                             <option value="completed" ${app.status === 'completed' ? 'selected' : ''}>Completed</option>
                         </select>
                     </span></div>
@@ -340,7 +342,7 @@ window.openViewModal = function(appointmentId) {
         <div class="detail-row"><div class="detail-label">Date & Time</div><div class="detail-value">${formatDateTimeModal(app.preferredDate, app.preferredTime)}</div></div>
         <div class="detail-row"><div class="detail-label">Mode</div><div class="detail-value">${formatMode(app.consultationMode)}</div></div>
         <div class="detail-row"><div class="detail-label">Purpose</div><div class="detail-value">${escapeHtml(app.purpose)}</div></div>
-        <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value"><span class="status-badge-modal ${app.status}">${app.status.toUpperCase()}</span></div></div>
+        <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value"><span class="status-badge-modal ${app.status}">${app.status === 'rejected' ? 'RESCHEDULE' : app.status.toUpperCase()}</span></div></div>
         <div class="detail-row"><div class="detail-label">Additional Notes</div><div class="detail-value">${escapeHtml(app.additionalNotes || 'None')}</div></div>
         <div class="detail-row"><div class="detail-label">Appointment ID</div><div class="detail-value text-xs">${app.appointmentId}</div></div>
         <div class="detail-row"><div class="detail-label">Created</div><div class="detail-value">${new Date(app.createdAt).toLocaleString()}</div></div>

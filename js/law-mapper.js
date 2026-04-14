@@ -6,8 +6,8 @@
     const officeDetails = {
         'OASH': {
             name: 'Office for Anti-Sexual Harassment (OASH)',
-            address: 'Mezzanine, Graduate School Bldg., International House Complex, UPLB, Los Baños, Laguna',
-            phone: '+63 49 501 1844',
+            address: '2nd Floor IH Bldg. Jos B. Juliano Ave. Brgy. Batong Malake, Los Baños, Philippines, 4031',
+            phone: '0991 896 9602',
             email: 'oash.uplb@up.edu.ph'
         },
         'SSO': {
@@ -61,7 +61,8 @@
             const expected = severityMap[aiResult.severity];
             if (expected) filtered = filtered.filter(p => p.offense_category === expected);
         }
-        if (aiResult.category && aiResult.category !== 'Not Harassment') {
+        // CHANGED: "Not Harassment" -> "Not Sexual Harassment"
+        if (aiResult.category && aiResult.category !== 'Not Sexual Harassment') {
             const aiCat = aiResult.category;
             filtered = filtered.filter(p => {
                 const types = inferHarassmentType(p);
@@ -113,7 +114,8 @@
 
         let applicableLaws = ['RA 11313 (Safe Spaces Act)'];
 
-        if (aiResult && aiResult.category && aiResult.category !== 'Not Harassment') {
+        // CHANGED: "Not Harassment" -> "Not Sexual Harassment"
+        if (aiResult && aiResult.category && aiResult.category !== 'Not Sexual Harassment') {
             const cat = aiResult.category;
             if (cat === 'Cyber') applicableLaws.push('RA 9995 (Anti-Photo and Video Voyeurism Act) - if applicable');
             if (cat === 'Physical' && isIntimate && (isStudentVictim || isEmployeePerp)) applicableLaws.push('RA 9262 (VAWC) - If victim is a woman/child');
@@ -264,7 +266,8 @@
 
         if (!lawsContainer) return;
 
-        if (aiResult && aiResult.category === 'Not Harassment') {
+        // CHANGED: "Not Harassment" -> "Not Sexual Harassment"
+        if (aiResult && aiResult.category === 'Not Sexual Harassment') {
             lawsContainer.innerHTML = '';
             lawsContainer.style.display = 'none';
             return;

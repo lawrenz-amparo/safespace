@@ -2,59 +2,113 @@
 (function() {
     'use strict';
 
+    /**
+     * Map new relationship values to internal categories
+     */
+    function mapRelationshipToInternal(relationshipType, isStudentVictim) {
+        const mapping = {
+            'student': 'classmate',           // student-student
+            'professor': isStudentVictim ? 'student_to_faculty' : 'authority',
+            'colleague': 'same-level',
+            'classmate': 'classmate',
+            'orgmate': 'orgmate',
+            'friend': 'none',
+            'outsider/stranger': 'stranger',
+            'with moral ascendancy': 'authority',
+            'with intimate': 'intimate'
+        };
+        return mapping[relationshipType] || 'none';
+    }
+
+    /**
+     * Map new classification values to internal categories
+     * For victim classification, we only care if it's 'Student' or not.
+     * For perpetrator classification, we map to the old set used in logic.
+     */
+    function mapClassificationToInternal(classification, isPerpetrator = false) {
+        if (!isPerpetrator) {
+            // Victim classification: only need to know if student
+            return classification === 'Student' ? 'Student' : 'NonStudent';
+        } else {
+            // Perpetrator classification: map to old values used in switch cases
+            const perpMap = {
+                'Student': 'Student',
+                'instructor/professor': 'Professor',
+                'non-teaching personnel (admin & reps)': "Gov't Employee",
+                'Alumni': 'Stranger',        // Alumni treated as non-UP/outsider
+                'non-UP/outsider': 'Stranger'
+            };
+            return perpMap[classification] || 'Stranger';
+        }
+    }
+
     function determineApplicableLaws(data) {
         const {
-            classification,
+            classification,               // complainant classification
             victimConstituent,
             complainedClassification,
             complainedConstituent,
             relationshipType
         } = data;
         
+        // Map to internal values
+        const isStudentVictim = (classification === 'Student');
+        const internalRelationship = mapRelationshipToInternal(relationshipType, isStudentVictim);
+        const internalPerpClass = mapClassificationToInternal(complainedClassification, true);
+        
+        // Build a normalized data object for the existing logic
+        const normalizedData = {
+            classification: isStudentVictim ? 'Student' : 'NonStudent',
+            victimConstituent: victimConstituent,
+            complainedClassification: internalPerpClass,
+            complainedConstituent: complainedConstituent,
+            relationshipType: internalRelationship
+        };
+        
         let applicableLaws = [];
         
         // --- Victim is a Student ---
-        if (classification === 'Student') {
-            if (victimConstituent === 'Yes' || victimConstituent === 'No') {
+        if (normalizedData.classification === 'Student') {
+            if (normalizedData.victimConstituent === 'Yes' || normalizedData.victimConstituent === 'No') {
                 const validPerpClasses = [
                     'Student', 'Professor', 'Instructor', 'Teacher',
                     "Gov't Employee", 'Stranger'
                 ];
-                if (validPerpClasses.includes(complainedClassification)) {
-                    if (complainedConstituent === 'Yes') {
-                        if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
-                            applicableLaws = ['RA 11313', 'OASH Code for Students'];
+                if (validPerpClasses.includes(normalizedData.complainedClassification)) {
+                    if (normalizedData.complainedConstituent === 'Yes') {
+                        if (normalizedData.relationshipType === 'classmate' || normalizedData.relationshipType === 'orgmate') {
+                            applicableLaws = ['RA 11313', 'ASH Code for Students'];
                         }
-                        else if (relationshipType === 'student_to_faculty') {
-                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'student_to_faculty') {
+                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'ASH Code for Employees'];
                         }
-                        else if (relationshipType === 'intimate') {
-                            applicableLaws = ['RA 11313', 'RA 9262 (If victim is a woman/child)', 'OASH Code for Students'];
+                        else if (normalizedData.relationshipType === 'intimate') {
+                            applicableLaws = ['RA 11313', 'RA 9262 (If victim is a woman/child)', 'ASH Code for Students'];
                         }
-                        else if (relationshipType === 'authority') {
-                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'authority') {
+                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'ASH Code for Employees'];
                         }
-                        else if (relationshipType === 'stranger') {
-                            applicableLaws = ['RA 11313', 'If UP student, OASH Code for Students', 'If UP employee, OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'stranger') {
+                            applicableLaws = ['RA 11313', 'If UP student, ASH Code for Students', 'If UP employee, ASH Code for Employees'];
                         }
                         else {
                             applicableLaws = ['RA 11313'];
                         }
                     }
-                    else if (complainedConstituent === 'No') {
-                        if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
+                    else if (normalizedData.complainedConstituent === 'No') {
+                        if (normalizedData.relationshipType === 'classmate' || normalizedData.relationshipType === 'orgmate') {
                             applicableLaws = ['RA 11313', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'student_to_faculty') {
+                        else if (normalizedData.relationshipType === 'student_to_faculty') {
                             applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'intimate') {
+                        else if (normalizedData.relationshipType === 'intimate') {
                             applicableLaws = ['RA 11313', 'RA 9262 (If victim is a woman/child)', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'authority') {
+                        else if (normalizedData.relationshipType === 'authority') {
                             applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'stranger') {
+                        else if (normalizedData.relationshipType === 'stranger') {
                             applicableLaws = ['RA 11313', 'Contact details of SSO'];
                         }
                         else {
@@ -68,58 +122,57 @@
         } 
         // --- Victim is NOT a Student (e.g., Professor, Employee, etc.) ---
         else {
-            if (victimConstituent === 'Yes' || victimConstituent === 'No') {
+            if (normalizedData.victimConstituent === 'Yes' || normalizedData.victimConstituent === 'No') {
                 const validPerpClasses = [
                     'Co-worker', 'Colleague', "Gov't Employee", 'Student', 'Stranger'
                 ];
-                if (validPerpClasses.includes(complainedClassification)) {
-                    if (complainedConstituent === 'Yes') {
-                        // NEW: faculty/staff victim, student perpetrator
-                        if (relationshipType === 'faculty_to_student') {
-                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'OASH Code for Students'];
+                if (validPerpClasses.includes(normalizedData.complainedClassification)) {
+                    if (normalizedData.complainedConstituent === 'Yes') {
+                        if (normalizedData.relationshipType === 'faculty_to_student') {
+                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'ASH Code for Students'];
                         }
-                        else if (relationshipType === 'same-level') {
-                            applicableLaws = ['RA 11313', 'RACCS', 'OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'same-level') {
+                            applicableLaws = ['RA 11313', 'RACCS', 'ASH Code for Employees'];
                         }
-                        else if (relationshipType === 'staff_to_supervisor') {
-                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'staff_to_supervisor') {
+                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'ASH Code for Employees'];
                         }
-                        else if (relationshipType === 'authority') {
-                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'authority') {
+                            applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'ASH Code for Employees'];
                         }
-                        else if (relationshipType === 'intimate') {
-                            applicableLaws = ['RA 11313', 'RA 9262 (If victim is a woman/child)', 'RACCS', 'OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'intimate') {
+                            applicableLaws = ['RA 11313', 'RA 9262 (If victim is a woman/child)', 'RACCS', 'ASH Code for Employees'];
                         }
-                        else if (relationshipType === 'none') {
-                            applicableLaws = ['RA 11313', 'OASH Code for Students'];
+                        else if (normalizedData.relationshipType === 'none') {
+                            applicableLaws = ['RA 11313', 'ASH Code for Students'];
                         }
-                        else if (relationshipType === 'stranger') {
-                            applicableLaws = ['RA 11313', 'If UP student, OASH Code for Students', 'If UP employee, OASH Code for Employees'];
+                        else if (normalizedData.relationshipType === 'stranger') {
+                            applicableLaws = ['RA 11313', 'If UP student, ASH Code for Students', 'If UP employee, ASH Code for Employees'];
                         }
                         else {
                             applicableLaws = ['RA 11313'];
                         }
                     }
-                    else if (complainedConstituent === 'No') {
-                        if (relationshipType === 'faculty_to_student') {
+                    else if (normalizedData.complainedConstituent === 'No') {
+                        if (normalizedData.relationshipType === 'faculty_to_student') {
                             applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'same-level') {
+                        else if (normalizedData.relationshipType === 'same-level') {
                             applicableLaws = ['RA 11313', 'RACCS', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'staff_to_supervisor') {
+                        else if (normalizedData.relationshipType === 'staff_to_supervisor') {
                             applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'authority') {
+                        else if (normalizedData.relationshipType === 'authority') {
                             applicableLaws = ['RA 11313', 'RACCS', 'RA 7877', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'intimate') {
+                        else if (normalizedData.relationshipType === 'intimate') {
                             applicableLaws = ['RA 11313', 'RA 9262 (If victim is a woman/child)', 'RACCS', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'none') {
+                        else if (normalizedData.relationshipType === 'none') {
                             applicableLaws = ['RA 11313', 'Contact details of SSO'];
                         }
-                        else if (relationshipType === 'stranger') {
+                        else if (normalizedData.relationshipType === 'stranger') {
                             applicableLaws = ['RA 11313', 'Contact details of SSO'];
                         }
                         else {
@@ -144,13 +197,13 @@
             lawsContainer.id = 'applicableLawsContainer';
             lawsContainer.className = 'mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg';
             
-            const relationshipSection = document.getElementById('relationship')?.closest('.grid');
+            const relationshipSection = document.getElementById('relationshipType')?.closest('.grid');
             if (relationshipSection && relationshipSection.parentNode) {
                 relationshipSection.parentNode.insertBefore(lawsContainer, relationshipSection.nextSibling);
             }
         }
         
-        if (applicableLaws.length > 0) {
+        if (applicableLaws.length > 0 && applicableLaws[0] !== 'Invalid complained classification') {
             lawsContainer.innerHTML = `
                 <div class="flex items-start gap-3">
                     <i class="fas fa-gavel text-blue-600 text-xl mt-1"></i>

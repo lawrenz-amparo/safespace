@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPLB Oash — file a report</title>
+    <title>UPLB OASH — file a report</title>
     <!-- Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +49,7 @@
                     <div class="w-8 h-8 rounded-md bg-up flex items-center justify-center">
                         <i class="fas fa-shield-alt text-white text-sm"></i>
                     </div>
-                    <span class="font-semibold text-[#6F1A1F] text-lg tracking-tight">UPLB Oash</span>
+                    <span class="font-semibold text-up text-lg tracking-tight">UPLB OASH</span>
                 </div>
                 <nav class="flex-1 space-y-1">
                     <a href="/user/dashboard.html" class="sidebar-link">
@@ -99,7 +99,7 @@
                 <!-- Main form card -->
                 <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-6 md:p-8">
                     <h2 class="text-2xl font-semibold text-[#2A2424] mb-2">Report an incident</h2>
-                    <p class="text-sm text-[#8F7E7E] mb-6">All information is handled with confidentiality by the Office of Student Counselling (OASH). <span class="text-red-500">*</span> indicates required fields.</p>
+                    <p class="text-sm text-[#8F7E7E] mb-6">All information is handled with confidentiality by the UPLB Office of Anti-Sexual Harassment (OASH). <span class="text-red-500">*</span> indicates required fields.</p>
 
                     <form id="reportForm">
                         <!-- ========== PERSONAL INFORMATION ========== -->
@@ -110,7 +110,7 @@
                             <div><label class="form-label required-star">Last name</label><input type="text" id="lastName" class="form-input" placeholder="Santos"></div>
                             <div><label class="form-label required-star">Age</label><input type="number" id="age" class="form-input" placeholder="22"></div>
                             <div><label class="form-label required-star">I am biologically</label><select id="biologicalSex" class="form-select"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-                            <div><label class="form-label required-star">I identify myself as</label><select id="identifiedAs" class="form-select"><option value="">Select</option><option>Male</option><option>Female</option><option>Non-binary</option><option>Other</option></select></div>
+                            <div><label class="form-label required-star">I identify myself as</label><select id="identifiedAs" class="form-select"><option value="">Select</option><option>Cisgender male</option><option>Cisgender female</option><option>Non-Binary</option></select></div>
                             <div><label class="form-label required-star">Civil status</label><select id="civilStatus" class="form-select"><option value="">Select</option><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select></div>
                             <div><label class="form-label required-star">Mobile no.</label><input type="tel" id="mobileNumber" class="form-input" placeholder="09171234567"></div>
                             <div><label class="form-label">Landline no.</label><input type="tel" id="landLineNumber" class="form-input" placeholder="(049) 536 1234"></div>
@@ -119,51 +119,55 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
-                            <div><label class="form-label required-star">College</label><input type="text" id="college" class="form-input" placeholder="e.g., CAS, CEAT"></div>
-                            <div><label class="form-label required-star">Department/Unit</label><input type="text" id="department" class="form-input" placeholder="e.g., Dept of Social Sciences"></div>
+                            <div><label class="form-label">College</label><input type="text" id="college" class="form-input" placeholder="N/A if not applicable"></div>
+                            <div><label class="form-label">Department/Unit</label><input type="text" id="department" class="form-input" placeholder="N/A if not applicable"></div>
                         </div>
 
                         <hr class="section-divider">
 
-                        <!-- ========== RESPONDENT'S NAME ========== -->
+                        <!-- ========== RESPONDENT'S DETAILS ========== -->
                         <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-user-tag"></i> Respondent's details (person complained of)</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div><label class="form-label required-star">Full name of person being complained</label><input type="text" id="complainedFullName" class="form-input" placeholder="Last, First M.I. or unknown"></div>
                             <div><label class="form-label required-star">Sex</label><select id="complainedSex" class="form-select"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-                            <div><label class="form-label">College</label><input type="text" id="complainedCollege" class="form-input" placeholder="if applicable"></div>
-                            <div><label class="form-label">Department/Unit</label><input type="text" id="complainedDepartment" class="form-input" placeholder="e.g., Dept, office, or org"></div>
+                            <div><label class="form-label">College</label><input type="text" id="complainedCollege" class="form-input" placeholder="N/A if not applicable"></div>
+                            <div><label class="form-label">Department/Unit</label><input type="text" id="complainedDepartment" class="form-input" placeholder="N/A if not applicable"></div>
                         </div>
 
                         <hr class="section-divider">
 
-                        <!-- ========== RESPONDENT'S NAME ========== -->
+                        <!-- ========== ADDITIONAL INFORMATION ========== -->
                         <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2">
                             <i class="fas fa-user-tag"></i> Additional Information
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
-                                <label class="form-label required-star">Victim Classification</label>
+                                <label class="form-label required-star">Complainant Classification</label>
                                 <select id="classification" class="form-select">
                                     <option value="">Select</option>
-                                    <option>Student</option>
-                                    <option>Professor</option>
-                                    <option>Instructor</option>
-                                    <option>Teacher</option>
-                                    <option>Gov't Employee</option>
-                                    <option>Stranger</option>
+                                    <option value="Student">Student</option>
+                                    <option value="instructor/professor">instructor/professor</option>
+                                    <option value="non-teaching personnel (admin & reps)">non-teaching personnel (admin & reps)</option>
+                                    <option value="Alumni">Alumni</option>
+                                    <option value="non-UP/outsider">non-UP/outsider</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label class="form-label required-star">Complained Classification</label>
+                                <label class="form-label required-star">Respondent Classification</label>
                                 <select id="complainedClassification" class="form-select">
                                     <option value="">Select</option>
+                                    <option value="Student">Student</option>
+                                    <option value="instructor/professor">instructor/professor</option>
+                                    <option value="non-teaching personnel (admin & reps)">non-teaching personnel (admin & reps)</option>
+                                    <option value="Alumni">Alumni</option>
+                                    <option value="non-UP/outsider">non-UP/outsider</option>
                                 </select>
                             </div>
 
-                            <!-- Is the Victim a UP Constituent? - Radio Group -->
+                            <!-- Is the Complainant a UP Constituent? -->
                             <div>
-                                <label class="form-label required-star">Victim is UP Constituent?</label>
+                                <label class="form-label required-star">Complainant is UP Constituent?</label>
                                 <div class="flex flex-wrap gap-4 mt-1">
                                     <label class="inline-flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="victimConstituent" value="Yes" class="form-radio text-up focus:ring-up">
@@ -176,9 +180,9 @@
                                 </div>
                             </div>
 
-                            <!-- Is the Perpetiator a UP Constituent? - Radio Group -->
+                            <!-- Is the Respondent a UP Constituent? -->
                             <div>
-                                <label class="form-label required-star">Perpetiator is UP Constituent?</label>
+                                <label class="form-label required-star">Respondent is UP Constituent?</label>
                                 <div class="flex flex-wrap gap-4 mt-1">
                                     <label class="inline-flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="complainedConstituent" value="Yes" class="form-radio text-up focus:ring-up">
@@ -195,15 +199,15 @@
                                 <label class="form-label required-star">Relationship with the Respondent</label>
                                 <select class="form-select" id="relationshipType" required>
                                     <option value="">Select relationship type</option>
-                                    <option value="classmate">Classmate</option>
-                                    <option value="orgmate">Organization Mate</option>
-                                    <option value="stranger">Stranger</option>
-                                    <option value="intimate">Intimate Relationship</option>
-                                    <option value="dating">Dating Relationship</option>
-                                    <option value="family">Family Member</option>
-                                    <option value="same-level">Same Level/Co-worker</option>
-                                    <option value="authority">With Authority/Moral Ascendancy</option>
-                                    <option value="other">Other</option>
+                                    <option value="student">student</option>
+                                    <option value="professor">professor</option>
+                                    <option value="colleague">colleague</option>
+                                    <option value="classmate">classmate</option>
+                                    <option value="orgmate">orgmate</option>
+                                    <option value="friend">friend</option>
+                                    <option value="outsider/stranger">outsider/stranger</option>
+                                    <option value="with moral ascendancy">with moral ascendancy</option>
+                                    <option value="with intimate">with intimate</option>
                                 </select>
                             </div>
 
@@ -211,7 +215,7 @@
                             <div>
                                 <label class="form-label required-star">Incident Location?</label>
                                 <select class="form-select" id="complainedInsideCampus" required>
-                                    <option value="" disabled="" selected="">— Select location —</option>
+                                    <option value="" disabled selected>— Select location —</option>
                                     <option value="Inside the campus">Inside the campus</option>
                                     <option value="Outside the campus, but UPLB activity">Outside the campus, but UPLB activity</option>
                                     <option value="Outside the campus and not UPLB activity">Outside the campus and not UPLB activity</option>
@@ -219,68 +223,45 @@
                             </div>
 
                             <div class="md:col-span-2">
-                                <label class="form-label required-start">Exact Location</label>
+                                <label class="form-label required-star">Exact Location</label>
                                 <select class="form-select" id="complainedExactLocation" required>
-
+                                    <!-- Populated by JavaScript -->
                                 </select>
                             </div>
                         </div>
 
                         <hr class="section-divider">
 
-
                         <!-- ========== COMPLAINANT'S STORY ========== -->
                         <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-pen-to-square"></i> Complainant's story</h3>
                         <div class="space-y-5">
                             <div><label class="form-label required-star">Describe in detail the incident</label><textarea id="complainantStory" rows="4" class="form-textarea" placeholder="What happened? Include date, time, location, witnesses..."></textarea></div>
-                        <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-scale-balanced"></i> Options to proceed with the complaint</h3>
-                            <div class="md:col-span-2,">
+                            <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-scale-balanced"></i> Options to proceed with the complaint</h3>
+                            <div class="md:col-span-2">
                                 <label class="block text-xs font-medium text-[#5F4E4E] mb-1">Incident Date & Time <span class="text-up">*</span></label>
                                 <div class="grid grid-cols-2 gap-4">
                                     <input type="date" id="incidentDate" name="incidentDate" required class="w-full px-3 py-2 border border-[#E0D5D5] rounded-lg bg-white text-sm focus:border-up focus:ring-1 focus:ring-up outline-none">
                                     <input type="time" id="incidentTime" name="incidentTime" required class="w-full px-3 py-2 border border-[#E0D5D5] rounded-lg bg-white text-sm focus:border-up focus:ring-1 focus:ring-up outline-none">
                                 </div>
                             </div>
-                            <div><label class="form-label required-star">Is there an event when the incident happened?</label><input type="text" id="complainedIncidentHappened" class="form-input" placeholder="e.g., February Fair, Loyalty Day, Parade, none"></div>
-                            <div><label class="form-label required-star">If stranger/unknown, describe physical appearance of the perpetrator/harasser</label><textarea id="complainedPhysicalAppearance" rows="2" class="form-textarea" placeholder="Height, build, clothing, distinguishing features..."></textarea></div>
+                            <div><label class="form-label required-star">Is there an event when the incident happened?</label><input type="text" id="complainedIncidentHappened" class="form-input" placeholder="e.g., during class, consultation hours, internship, feb fair, etc."></div>
+                            <!-- REMOVED: physical appearance field -->
                         </div>
 
                         <hr class="section-divider">
-                        
 
                         <!-- ========== OPTIONS TO PROCEED ========== -->
-                        
                         <div class="space-y-4">
                             <div>
                                 <label class="form-label required-star">Options to proceed with the complainant</label>
                                 <select id="procedureType" class="form-select">
                                     <option value="">Select</option>
-                                    <option>Formal procedure</option>
-                                    <option>Informal procedure</option>
-                                    <option>Undecided / need guidance</option>
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                    <option>Undecided/need guidance</option>
                                 </select>
                             </div>
                             <div><label class="form-label">Remarks</label><input type="text" id="remarks" class="form-input" placeholder="Any additional remarks about procedure"></div>
-                        </div>
-
-                        <hr class="section-divider">
-
-                        <!-- ========== WHERE DID YOU HEAR ABOUT OASH ========== -->
-                        <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-bullhorn"></i> Where did you hear about OASH?</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div>
-                                <label class="form-label required-star">Please help us understand how you found out</label>
-                                <select id="whereDidYouHearAboutUs" class="form-select">
-                                    <option value="">Select</option>
-                                    <option>Student orientation</option>
-                                    <option>Flyers / leaflets / ads</option>
-                                    <option>Word of mouth</option>
-                                    <option>Social media</option>
-                                    <option>OASH caravan</option>
-                                    <option>Others:</option>
-                                </select>
-                            </div>
-                            <div><label class="form-label">If others, please specify</label><input type="text" id="otherWhereDidYouHearAboutUs" class="form-input" placeholder="e.g., professor, friend"></div>
                         </div>
 
                         <hr class="section-divider">
@@ -293,7 +274,11 @@
                             </label>
                             <label class="flex items-start gap-3">
                                 <input type="checkbox" id="confirmConfidentiality" class="mt-1 accent-up">
-                                <span class="text-sm text-[#2A2424]">I understand that this report will be handled confidentially and that OASH will contact me if I provided contact information.</span>
+                                <span class="text-sm text-[#2A2424]">I understand that this report will be handled with confidentiality.</span>
+                            </label>
+                            <label class="flex items-start gap-3">
+                                <input type="checkbox" id="confirmAppointment" class="mt-1 accent-up">
+                                <span class="text-sm text-[#2A2424]">I will set an appointment with OASH for intake interview.</span>
                             </label>
                         </div>
 
@@ -306,7 +291,7 @@
 
                     <!-- Emergency contact -->
                     <div class="mt-6 text-xs text-[#A18686] p-3 bg-[#FDF8F8] rounded-lg border border-[#F0E4E4]">
-                        <i class="fas fa-phone-alt mr-1 text-up"></i> If this is an emergency or you need immediate assistance, please call UPLB OASH: <span class="font-medium">(049) 536 6701</span> or the university hotline.
+                        <i class="fas fa-phone-alt mr-1 text-up"></i> If this is an emergency or you need immediate assistance, please call UPLB OASH: <span class="font-medium">0991 896 9602</span> or the university hotline.
                     </div>
                 </div>
 
@@ -315,9 +300,9 @@
                     <div class="flex items-center gap-3">
                         <i class="fas fa-headset text-up text-xl"></i>
                         <div>
-                            <h3 class="font-medium text-[#2A2424]">Office of Student Counselling</h3>
-                            <p class="text-sm text-[#8F7E7E] mt-1">+63 49 501 1844 · oash.uplb@up.edu.ph</p>
-                            <p class="text-xs text-[#A18686] mt-1">Mezzanine, Graduate School Bldg., International House Complex, UPLB, Los Baños, Laguna</p>
+                            <h3 class="font-medium text-[#2A2424]">Office of Anti-Sexual Harassment (OASH)</h3>
+                            <p class="text-sm text-[#8F7E7E] mt-1">0991 896 9602 · oash.uplb@up.edu.ph</p>
+                            <p class="text-xs text-[#A18686] mt-1">2nd Floor IH Bldg. Jos B. Juliano Ave. Brgy. Batong Malake, Los Baños, Philippines, 4031</p>
                         </div>
                     </div>
                 </div>

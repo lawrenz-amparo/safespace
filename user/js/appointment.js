@@ -51,8 +51,15 @@ function formatDateTime(dateTimeString) {
     }
 }
 
+// UPDATED: Map consultation mode to user‑friendly display (supports new & legacy values)
 function getModeDisplay(mode) {
     const modes = {
+        // New modes
+        'in-person-oash': 'In Person (OASH)',
+        'in-person-counseling': 'In Person (Counseling)',
+        'video-call-oash': 'Video Call OASH',
+        'video-call-counseling': 'Video Call Counseling',
+        // Legacy modes (backward compatibility)
         'in-person': 'In-person',
         'video-call': 'Video call',
         'phone-call': 'Phone call'
@@ -224,25 +231,17 @@ async function createAppointment(formData) {
             fetchAppointments(currentPage);
             return true;
         } else {
-            // Handle different error status codes
             let errorMsg = data.message || 'Failed to create appointment';
-            
-            // Check for duplicate appointment error (409 Conflict)
             if (response.status === 409) {
                 errorMsg = data.message || 'This time slot is already booked. Please choose a different time.';
-            }
-            // Check for validation errors (400 Bad Request)
-            else if (response.status === 400) {
+            } else if (response.status === 400) {
                 errorMsg = data.message || 'Please check your input and try again.';
-            }
-            // Check for authentication error (401 Unauthorized)
-            else if (response.status === 401) {
+            } else if (response.status === 401) {
                 errorMsg = 'Your session has expired. Please log in again.';
                 setTimeout(() => {
                     window.location.href = '/login.html';
                 }, 2000);
             }
-            
             toast.error('Request failed', errorMsg);
             return false;
         }
@@ -311,16 +310,14 @@ if (document.getElementById('timePicker')) {
         minuteIncrement: 60,
         disableMobile: true,
         theme: 'material_red',
-        time_24hr: true,  // Use 24-hour format for consistency
+        time_24hr: true,
         minTime: '08:00',
         maxTime: '17:00',
-        // Only allow these specific hours
         enable: [
             "08:00", "09:00", "10:00", "11:00", "12:00", 
             "13:00", "14:00", "15:00", "16:00"
         ],
         onReady: function(selectedDates, dateStr, instance) {
-            // Ensure minutes are always 00
             instance.set('minuteIncrement', 60);
         }
     });
@@ -334,14 +331,15 @@ if (form) {
         
         const fullName = document.getElementById('fullName').value;
         const phoneNumber = document.getElementById('phoneNumber').value;
-        const consultationMode = document.getElementById('consultationMode').value;
+        // Order: purpose first, then consultationMode (as in HTML)
         const purpose = document.getElementById('purpose').value;
+        const consultationMode = document.getElementById('consultationMode').value;
         const preferredDate = document.getElementById('datePicker').value;
         let preferredTime = document.getElementById('timePicker').value;
         const additionalNotes = document.getElementById('additionalNotes').value;
         const confirmAccuracy = document.getElementById('confirmAccuracy').checked;
         
-        if (!fullName || !phoneNumber || !consultationMode || !purpose || !preferredDate || !preferredTime) {
+        if (!fullName || !phoneNumber || !purpose || !consultationMode || !preferredDate || !preferredTime) {
             toast.warning('Missing fields', 'Please fill in all required fields.');
             return;
         }
@@ -353,7 +351,6 @@ if (form) {
         
         // Convert time to HH:00 format if it's in AM/PM format
         if (preferredTime.includes('AM') || preferredTime.includes('PM')) {
-            // Parse time like "2:00 PM" to "14:00"
             const timeMatch = preferredTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
             if (timeMatch) {
                 let hours = parseInt(timeMatch[1]);
@@ -370,7 +367,6 @@ if (form) {
             }
         }
         
-        // Ensure time is in HH:00 format
         if (!/^([0-1]?[0-9]|2[0-3]):00$/.test(preferredTime)) {
             toast.error('Invalid time', 'Please select an hourly time slot (e.g., 09:00, 14:00)');
             return;

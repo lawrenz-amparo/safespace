@@ -228,34 +228,33 @@ exactLocationSelect.addEventListener('change', handleOtherLocation);
 // Initial state
 toggleExactLocation();
 
+// UPDATED: New classification options (same for both complainant and respondent)
+const CLASSIFICATION_OPTIONS = [
+    { value: "Student", text: "Student" },
+    { value: "instructor/professor", text: "instructor/professor" },
+    { value: "non-teaching personnel (admin & reps)", text: "non-teaching personnel (admin & reps)" },
+    { value: "Alumni", text: "Alumni" },
+    { value: "non-UP/outsider", text: "non-UP/outsider" }
+];
+
+// UPDATED: Static relationship options (no longer dependent on classification)
+const RELATIONSHIP_OPTIONS = [
+    { value: "student", text: "student" },
+    { value: "professor", text: "professor" },
+    { value: "colleague", text: "colleague" },
+    { value: "classmate", text: "classmate" },
+    { value: "orgmate", text: "orgmate" },
+    { value: "friend", text: "friend" },
+    { value: "outsider/stranger", text: "outsider/stranger" },
+    { value: "with moral ascendancy", text: "with moral ascendancy" },
+    { value: "with intimate", text: "with intimate" }
+];
+
 function updateComplainedClassificationOptions() {
-    const classification = document.getElementById('classification').value;
     const complainedClassificationSelect = document.getElementById('complainedClassification');
-    
     complainedClassificationSelect.innerHTML = '<option value="">Select classification</option>';
     
-    let options = [];
-    
-    if (classification === 'Student') {
-        options = [
-            { value: "Student", text: "Student" },
-            { value: "Professor", text: "Professor" },
-            { value: "Instructor", text: "Instructor" },
-            { value: "Teacher", text: "Teacher" },
-            { value: "Gov't Employee", text: "Gov't Employee" },
-            { value: "Stranger", text: "Stranger" }
-        ];
-    } else if (classification && classification !== '') {
-        options = [
-            { value: "Co-worker", text: "Co-worker" },
-            { value: "Colleague", text: "Colleague" },
-            { value: "Gov't Employee", text: "Gov't Employee" },
-            { value: "Student", text: "Student" },
-            { value: "Stranger", text: "Stranger" }
-        ];
-    }
-    
-    options.forEach(option => {
+    CLASSIFICATION_OPTIONS.forEach(option => {
         const optionElement = document.createElement('option');
         optionElement.value = option.value;
         optionElement.textContent = option.text;
@@ -264,35 +263,10 @@ function updateComplainedClassificationOptions() {
 }
 
 function updateRelationshipOptions() {
-    const classification = document.getElementById('classification').value;
     const relationshipSelect = document.getElementById('relationshipType');
-    
     relationshipSelect.innerHTML = '<option value="">Select relationship type</option>';
     
-    let options = [];
-    
-    if (classification === 'Student') {
-        options = [
-            { value: "classmate", text: "Classmate" },
-            { value: "orgmate", text: "Organization Mate" },
-            { value: "student_to_faculty_staff", text: "Student to faculty/staff" },
-            { value: "stranger", text: "Stranger" },
-            { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
-            { value: "authority", text: "With authority, influence, or moral ascendacy over victim" }
-        ];
-    } else if (classification && classification !== '') {
-        options = [
-            { value: "same-level", text: "Same level" },
-            { value: "staff_to_supervisor", text: "Staff to immediate supervisor/boss" },
-            { value: "faculty_staff_to_student", text: "Faculty/Staff to Student" },
-            { value: "authority", text: "With authority, influence, or moral ascendacy over victim" },
-            { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
-            { value: "none", text: "No specific relationship" },
-            { value: "stranger", text: "Stranger" }
-        ];
-    }
-    
-    options.forEach(option => {
+    RELATIONSHIP_OPTIONS.forEach(option => {
         const optionElement = document.createElement('option');
         optionElement.value = option.value;
         optionElement.textContent = option.text;
@@ -303,7 +277,6 @@ function updateRelationshipOptions() {
 function collectFormData() {
     const victimConstituentRadio = document.querySelector('input[name="victimConstituent"]:checked');
     const complainedConstituentRadio = document.querySelector('input[name="complainedConstituent"]:checked');
-    const insideCampusRadio = document.querySelector('input[name="complainedInsideCampus"]:checked');
     
     return {
         firstName: document.getElementById('firstName').value.trim(),
@@ -311,7 +284,7 @@ function collectFormData() {
         lastName: document.getElementById('lastName').value.trim(),
         age: document.getElementById('age').value,
         biologicalSex: document.getElementById('biologicalSex').value,
-        identifiedAs: document.getElementById('identifiedAs').value, 
+        identifiedAs: document.getElementById('identifiedAs').value,
         civilStatus: document.getElementById('civilStatus').value,
         mobileNumber: document.getElementById('mobileNumber').value.trim(),
         landLineNumber: document.getElementById('landLineNumber').value.trim(),
@@ -332,12 +305,10 @@ function collectFormData() {
         relationshipType: document.getElementById('relationshipType').value,
         complainantStory: document.getElementById('complainantStory').value.trim(),
         complainedIncidentHappened: document.getElementById('complainedIncidentHappened').value.trim(),
-        complainedPhysicalAppearance: document.getElementById('complainedPhysicalAppearance').value.trim(),
+        // REMOVED: complainedPhysicalAppearance field
         procedureType: document.getElementById('procedureType').value,
         remarks: document.getElementById('remarks').value.trim(),
-        whereDidYouHearAboutUs: document.getElementById('whereDidYouHearAboutUs').value,
-        otherWhereDidYouHearAboutUs: document.getElementById('otherWhereDidYouHearAboutUs').value.trim(),
-        // New fields for incident date/time
+        // REMOVED: whereDidYouHearAboutUs and otherWhereDidYouHearAboutUs
         incidentDate: document.getElementById('incidentDate').value,
         incidentTime: document.getElementById('incidentTime').value
     };
@@ -350,9 +321,7 @@ function validateForm(data) {
         'classification', 'college', 'department', 'victimConstituent',
         'complainedFullName', 'complainedSex', 'complainedClassification', 
         'complainedConstituent', 'complainedInsideCampus', 'relationshipType',
-        'complainantStory', 'complainedIncidentHappened', 'complainedPhysicalAppearance', 
-        'procedureType', 'whereDidYouHearAboutUs'
-        // Optional: add 'incidentDate', 'incidentTime' if they are required
+        'complainantStory', 'complainedIncidentHappened', 'procedureType'
     ];
     
     for (let field of required) {
@@ -362,24 +331,25 @@ function validateForm(data) {
                 age: 'Age', biologicalSex: 'Biological sex', identifiedAs: 'Identified as',
                 civilStatus: 'Civil status', mobileNumber: 'Mobile number', presentAddress: 'Present address',
                 permanentAddress: 'Permanent address', classification: 'Classification', college: 'College',
-                department: 'Department', victimConstituent: 'Victim is UP Constituent',
-                complainedFullName: 'Complained full name', complainedSex: 'Complained sex',
-                complainedClassification: 'Complained classification', complainedConstituent: 'Perpetrator is UP Constituent', 
-                complainedInsideCampus: 'Incident happened inside campus', relationshipType: 'Relationship with Respondent',
-                complainantStory: 'Complainant story', complainedIncidentHappened: 'Incident happened',
-                complainedPhysicalAppearance: 'Physical appearance', procedureType: 'Procedure type', 
-                whereDidYouHearAboutUs: 'Where did you hear about us'
+                department: 'Department', victimConstituent: 'Complainant is UP Constituent',
+                complainedFullName: 'Respondent full name', complainedSex: 'Respondent sex',
+                complainedClassification: 'Respondent classification', complainedConstituent: 'Respondent is UP Constituent', 
+                complainedInsideCampus: 'Incident location', relationshipType: 'Relationship with Respondent',
+                complainantStory: 'Complainant story', complainedIncidentHappened: 'Event when incident happened',
+                procedureType: 'Options to proceed'
             };
             toast.warning('Missing field', `${fieldNames[field] || field} is required`);
             return false;
         }
     }
     
+    // Updated checkboxes (now three)
     const confirmAccuracy = document.getElementById('confirmAccuracy').checked;
     const confirmConfidentiality = document.getElementById('confirmConfidentiality').checked;
+    const confirmAppointment = document.getElementById('confirmAppointment').checked;
     
-    if (!confirmAccuracy || !confirmConfidentiality) {
-        toast.warning('Confirmation required', 'Please confirm the accuracy and confidentiality agreements.');
+    if (!confirmAccuracy || !confirmConfidentiality || !confirmAppointment) {
+        toast.warning('Confirmation required', 'Please confirm all three agreements to proceed.');
         return false;
     }
     
@@ -504,7 +474,6 @@ async function submitReport() {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         
         const response = await fetch('https://safespace-back.onrender.com/api/v1/user/report', {
-        // const response = await fetch('http://localhost:3000/api/v1/user/report', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -521,6 +490,7 @@ async function submitReport() {
             document.getElementById('reportForm').reset();
             document.getElementById('confirmAccuracy').checked = false;
             document.getElementById('confirmConfidentiality').checked = false;
+            document.getElementById('confirmAppointment').checked = false;
             
             const radioGroups = ['victimConstituent', 'complainedConstituent', 'complainedInsideCampus'];
             radioGroups.forEach(group => {
@@ -569,8 +539,7 @@ function loadDraft() {
             }
         });
         
-        // Explicitly set incident date/time (already covered by the loop if IDs match)
-        // But ensure they are set:
+        // Explicitly set incident date/time
         if (document.getElementById('incidentDate') && formData.incidentDate) {
             document.getElementById('incidentDate').value = formData.incidentDate;
         }
@@ -602,14 +571,7 @@ document.getElementById('mobileLogoutBtn').addEventListener('click', (e) => {
     handleLogout();
 });
 
-document.getElementById('whereDidYouHearAboutUs').addEventListener('change', (e) => {
-    const otherInput = document.getElementById('otherWhereDidYouHearAboutUs');
-    if (e.target.value === 'Others:') {
-        otherInput.parentElement.style.display = 'block';
-    } else {
-        otherInput.parentElement.style.display = 'none';
-    }
-});
+// REMOVED: whereDidYouHearAboutUs event listener (field removed)
 
 document.getElementById('classification').addEventListener('change', () => {
     updateComplainedClassificationOptions();

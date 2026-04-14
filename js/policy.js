@@ -162,7 +162,80 @@ const antiSexualHarassmentCode = [
     applicable_to: ["students"],
     category: "student_discipline",
     relevance_score: 0.95
-  }
+  },
+  {
+    policy_id: "POL-ASH-010",
+    title: "Sexual Harassment Defined",
+    source: "Anti-Sexual Harassment Code",
+    section: "Section 5",
+    offense_category: null,
+    content:
+      "Sexual harassment is unwanted, unwelcome, uninvited behavior of a sexual nature or inappropriate sexual advances or offensive remark about a person's sex, sexual orientation, or gender identity. It is an act, which may be committed physically, verbally, or visually with or without the use of information communication technology. Sexual harassment may be a demand or request for a sexual favor by a person of authority, influence or moral ascendancy in exchange for appointments, grants, grades or favors, or set as terms and conditions for appointments, grants, grades or favors regardless of whether such act or series of acts are accepted by the offended party. It may be committed inside UP premises; or outside UP premises in a work, education, research, extension, or related activity.",
+    punishment: null,
+    keywords: [
+      "sexual harassment",
+      "defined",
+      "unwanted behavior",
+      "sexual advances",
+      "gender identity",
+      "sexual orientation",
+      "authority",
+      "moral ascendancy",
+      "UP premises",
+    ],
+    applicable_to: ["teaching personnel", "non-teaching personnel", "students"],
+    category: "definition",
+    relevance_score: 1.0,
+  },
+  // Section 5 – Scope and Coverage
+  {
+    policy_id: "POL-ASH-011",
+    title: "Sexual Harassment – Scope and Coverage",
+    source: "Anti-Sexual Harassment Code",
+    section: "Section 5",
+    offense_category: null,
+    content:
+      "Sexual harassment under this Code may include, but is not limited to, cases involving abuse of authority or power, ascendancy, influence such as in a teacher-student, senior faculty-junior faculty, health worker-patient or healthcare provider-client relationship; cases involving peer relationships such as faculty-faculty, employee-employee, or student-student relations, or cases involving harassment of teaching or non-teaching personnel by students, or cases involving harassment of supervisors by subordinates. This Code contemplates cases of harassment involving persons of the same or opposite sex, regardless of sexual orientation, gender identity and expression. Where the act/s of sexual harassment are shown to be organization-related or organization-based, the liability for sexual harassment shall extend to the officers of the organization, who are registered students during the commission of the offense, and the organization itself.",
+    punishment: null,
+    keywords: [
+      "scope",
+      "coverage",
+      "teacher-student",
+      "peer relationship",
+      "same sex",
+      "organization liability",
+      "gender expression",
+    ],
+    applicable_to: ["teaching personnel", "non-teaching personnel", "students"],
+    category: "definition",
+    relevance_score: 0.95,
+  },
+
+  // Section 6 – Persons Liable
+  {
+    policy_id: "POL-ASH-012",
+    title: "Persons Liable",
+    source: "Anti-Sexual Harassment Code",
+    section: "Section 6",
+    offense_category: null,
+    content:
+      "Any member of the UP community is liable for sexual harassment when he/she: (a) directly participates in the execution of any act of sexual harassment as defined by this Code; (b) induces or directs another or others to commit sexual harassment as defined by this Code; (c) cooperates in the commission of sexual harassment by another through an act without which the sexual harassment would not have been accomplished; (d) cooperates in the commission of sexual harassment by another through previous or simultaneous acts; (e) benefits from the commission of any act of sexual harassment; (f) conceals or hides the commission of any act of sexual harassment; and (g) restrains, or coerces the victim from filing the appropriate complaint.",
+    punishment: null,
+    keywords: [
+      "persons liable",
+      "direct participation",
+      "induces",
+      "cooperates",
+      "benefits",
+      "conceals",
+      "coerces",
+      "UP community",
+    ],
+    applicable_to: ["teaching personnel", "non-teaching personnel", "students"],
+    category: "liability",
+    relevance_score: 0.95,
+  },
+
 ];
 
 const irrRA11313 = [
