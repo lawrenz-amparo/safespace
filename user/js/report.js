@@ -47,6 +47,187 @@ function checkAuth() {
     return true;
 }
 
+const campusLocations = [
+    // College of Arts and Sciences (CAS) & General Academic Units
+    "Physical Sciences Building (PhySci / PS / PSC)",
+    "Biological Sciences Building (BioSci / IBS)",
+    "Mathematics Building",
+    "CAS Building (Old Humanities)",
+    "CAS Annex 1 (A1)",
+    "CAS Annex 2 (A2 / Old Chem)",
+    "New CAS Building / CAS Complex (NCAS)",
+    "Chemistry Building (New Chem)",
+    "ICS Building (within PhySci complex)",
+    "IBS Lecture Hall (IBSLH)",
+    "Physical Science Lecture Halls (PSLH A, B, C)",
+    "Humanities Building",
+    
+    // Administrative & General Purpose Buildings
+    "Abelardo G. Samonte Hall (AGS / Ag. Samonte Hall)",
+    "D.L. Umali Hall",
+    "Student Union Building (SU)",
+    "Baker Memorial Hall",
+    "UPLB Main Library",
+    "Graduate School Building",
+    "Office of Student Affairs (OSA)",
+    "University Registrar",
+    "UPLB Gate / Guardhouse",
+    "University Health Service",
+    
+    // College of Agriculture and Food Science (CAFS)
+    "Institute of Plant Breeding (IPB complex)",
+    "IPB Admin Building",
+    "IPB Biotechnology Building",
+    "IPB Module A",
+    "IPB Module B",
+    "IPB Module C",
+    "Screenhouses / greenhouses",
+    "National Crop Protection Center (NCPC)",
+    "Institute of Crop Science (ICropS)",
+    "Institute of Animal Science (IAS)",
+    "Institute of Food Science and Technology (IFST)",
+    "Agricultural Systems Institute (ASI)",
+    "Institute of Weed Science, Entomology & Plant Pathology (IWEP)",
+    "Animal housing & experimental farms",
+    
+    // College of Economics and Management (CEM)
+    "CEM Main Building",
+    "CEM Graduate Building",
+    "ACCI (Agricultural Credit and Cooperatives Institute)",
+    
+    // College of Development Communication (CDC)
+    "College of Development Communication (CDC Building)",
+    "CDC Auditorium",
+    
+    // College of Engineering and Agro-Industrial Technology (CEAT)
+    "CEAT Main Building",
+    "Electrical Engineering Building",
+    "Mechanical Engineering Building",
+    "Agricultural & Biosystems Engineering Building",
+    "Civil Engineering area structures",
+    
+    // College of Veterinary Medicine (CVM)
+    "College of Veterinary Medicine Main Building (CVM Complex)",
+    "Veterinary Teaching Hospital",
+    "Diagnostic Laboratories",
+    
+    // College of Forestry and Natural Resources (CFNR)
+    "CFNR Main Building / Administration",
+    "Wood Science Building",
+    "Forest Products Research buildings",
+    
+    // Other Institutes & Research Centers
+    "UPLB Museum of Natural History",
+    "SEARCA",
+    "BIOTECH (National Institute of Molecular Biology & Biotechnology)",
+    "Dairy Training and Research Institute (DTRI)",
+    "Philippine Carabao Center (UPLB unit)",
+    
+    // Schools
+    "UPLB Rural High School",
+    "UPLB Elementary School",
+    
+    // Residence Halls & Housing
+    "Men's Residence Hall",
+    "Women's Residence Hall",
+    "New Dormitory (co-ed)",
+    "International House (IH)",
+    "Graduate School Dormitory / Grad House",
+    "Centennial Residence Hall (Centen)",
+    "Forestry Residence Hall (Foreha / Foreha)",
+    "New Integrated Dormitory",
+    "Upper Campus Dorms (clustered housing units)",
+    "Staff Housing / UPLB Housing Areas",
+    "SEARCA Residence / Guest Housing",
+    "Researcher / Visiting Scholar Housing",
+    
+    // Outdoor Areas & Parking
+    "Pili Drive",
+    "Freedom Park",
+    "Oblation Park",
+    "Carabao Park",
+    "Baker Hall Field",
+    "CEM Parking Area",
+    "CDC Parking Area",
+    "SU Parking",
+    "Baker Hall Parking",
+    "Main Library Parking",
+    "CEAT Parking zones",
+    "Forestry parking areas"
+];
+
+const locationSelect = document.getElementById('complainedInsideCampus');
+const exactLocationSelect = document.getElementById('complainedExactLocation');
+const exactLocationContainer = exactLocationSelect.parentElement;
+
+function populateExactLocations() {
+    exactLocationSelect.innerHTML = '<option value="" disabled selected>— Select exact location —</option>';
+    
+    campusLocations.forEach(location => {
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        exactLocationSelect.appendChild(option);
+    });
+    
+    // Add option for "Other" with text input
+    const otherOption = document.createElement('option');
+    otherOption.value = "other";
+    otherOption.textContent = "Other (Please specify)";
+    exactLocationSelect.appendChild(otherOption);
+}
+
+function toggleExactLocation() {
+    const selectedValue = locationSelect.value;
+    
+    if (selectedValue === "Inside the campus") {
+        exactLocationContainer.style.display = "block";
+        exactLocationSelect.required = true;
+        
+        // Populate locations if not already populated
+        if (exactLocationSelect.options.length <= 1) {
+            populateExactLocations();
+        }
+    } else {
+        exactLocationContainer.style.display = "none";
+        exactLocationSelect.required = false;
+        exactLocationSelect.value = "";
+    }
+}
+
+function handleOtherLocation() {
+    if (exactLocationSelect.value === "other") {
+        // Check if text input already exists
+        let otherInput = document.getElementById('otherLocationInput');
+        if (!otherInput) {
+            otherInput = document.createElement('input');
+            otherInput.type = 'text';
+            otherInput.id = 'otherLocationInput';
+            otherInput.placeholder = 'Please specify the exact location';
+            otherInput.className = 'form-input mt-2';
+            otherInput.required = exactLocationSelect.required;
+            
+            // Insert after the select element
+            exactLocationSelect.parentNode.insertBefore(otherInput, exactLocationSelect.nextSibling);
+        } else {
+            otherInput.style.display = 'block';
+        }
+    } else {
+        const otherInput = document.getElementById('otherLocationInput');
+        if (otherInput) {
+            otherInput.style.display = 'none';
+            otherInput.value = '';
+        }
+    }
+}
+
+// Add event listeners
+locationSelect.addEventListener('change', toggleExactLocation);
+exactLocationSelect.addEventListener('change', handleOtherLocation);
+
+// Initial state
+toggleExactLocation();
+
 function updateComplainedClassificationOptions() {
     const classification = document.getElementById('classification').value;
     const complainedClassificationSelect = document.getElementById('complainedClassification');
@@ -94,6 +275,7 @@ function updateRelationshipOptions() {
         options = [
             { value: "classmate", text: "Classmate" },
             { value: "orgmate", text: "Organization Mate" },
+            { value: "student_to_faculty_staff", text: "Student to faculty/staff" },
             { value: "stranger", text: "Stranger" },
             { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
             { value: "authority", text: "With authority, influence, or moral ascendacy over victim" }
@@ -101,9 +283,11 @@ function updateRelationshipOptions() {
     } else if (classification && classification !== '') {
         options = [
             { value: "same-level", text: "Same level" },
+            { value: "staff_to_supervisor", text: "Staff to immediate supervisor/boss" },
+            { value: "faculty_staff_to_student", text: "Faculty/Staff to Student" },
             { value: "authority", text: "With authority, influence, or moral ascendacy over victim" },
             { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
-            { value: "none", text: "None" },
+            { value: "none", text: "No specific relationship" },
             { value: "stranger", text: "Stranger" }
         ];
     }
@@ -143,7 +327,8 @@ function collectFormData() {
         complainedCollege: document.getElementById('complainedCollege').value.trim(),
         complainedDepartment: document.getElementById('complainedDepartment').value.trim(),
         complainedConstituent: complainedConstituentRadio ? complainedConstituentRadio.value : '',
-        complainedInsideCampus: insideCampusRadio ? insideCampusRadio.value : '',
+        complainedInsideCampus: document.getElementById('complainedInsideCampus').value,
+        complainedExactLocation: document.getElementById('complainedExactLocation').value,
         relationshipType: document.getElementById('relationshipType').value,
         complainantStory: document.getElementById('complainantStory').value.trim(),
         complainedIncidentHappened: document.getElementById('complainedIncidentHappened').value.trim(),
@@ -151,7 +336,10 @@ function collectFormData() {
         procedureType: document.getElementById('procedureType').value,
         remarks: document.getElementById('remarks').value.trim(),
         whereDidYouHearAboutUs: document.getElementById('whereDidYouHearAboutUs').value,
-        otherWhereDidYouHearAboutUs: document.getElementById('otherWhereDidYouHearAboutUs').value.trim()
+        otherWhereDidYouHearAboutUs: document.getElementById('otherWhereDidYouHearAboutUs').value.trim(),
+        // New fields for incident date/time
+        incidentDate: document.getElementById('incidentDate').value,
+        incidentTime: document.getElementById('incidentTime').value
     };
 }
 
@@ -164,6 +352,7 @@ function validateForm(data) {
         'complainedConstituent', 'complainedInsideCampus', 'relationshipType',
         'complainantStory', 'complainedIncidentHappened', 'complainedPhysicalAppearance', 
         'procedureType', 'whereDidYouHearAboutUs'
+        // Optional: add 'incidentDate', 'incidentTime' if they are required
     ];
     
     for (let field of required) {
@@ -213,7 +402,7 @@ function updateApplicableLaws() {
 
 async function predictHarassment(description) {
     try {
-        const response = await fetch('http://127.0.0.1:8000/predict', {
+        const response = await fetch('/api/predict', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -237,6 +426,30 @@ async function predictHarassment(description) {
     } catch (error) {
         console.error('Error calling prediction API:', error);
         return null;
+    }
+}
+
+async function translateToEnglish(text) {
+    if (!text.trim()) return text;
+    
+    try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=tl&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data[0]) {
+            let translatedText = '';
+            for (let i = 0; i < data[0].length; i++) {
+                if (data[0][i][0]) {
+                    translatedText += data[0][i][0];
+                }
+            }
+            return translatedText || text;
+        }
+        return text;
+    } catch (error) {
+        console.warn('Translation failed:', error);
+        return text;
     }
 }
 
@@ -267,8 +480,11 @@ async function submitReport() {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing report...';
     
     try {
+        const translatedDescription = await translateToEnglish(formData.complainantStory);
+        console.log("Translated Text From User", translatedDescription);
+
         // Call prediction API first
-        const predictionResult = await predictHarassment(formData.complainantStory);
+        const predictionResult = await predictHarassment(translatedDescription);
         
         if (predictionResult) {
             formData.predictedOffense = predictionResult.offenseLabel;
@@ -352,6 +568,15 @@ function loadDraft() {
                 }
             }
         });
+        
+        // Explicitly set incident date/time (already covered by the loop if IDs match)
+        // But ensure they are set:
+        if (document.getElementById('incidentDate') && formData.incidentDate) {
+            document.getElementById('incidentDate').value = formData.incidentDate;
+        }
+        if (document.getElementById('incidentTime') && formData.incidentTime) {
+            document.getElementById('incidentTime').value = formData.incidentTime;
+        }
         
         updateApplicableLaws();
         toast.info('Draft loaded', 'Your saved draft has been loaded.');

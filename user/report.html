@@ -114,13 +114,11 @@
                             <div><label class="form-label required-star">Civil status</label><select id="civilStatus" class="form-select"><option value="">Select</option><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select></div>
                             <div><label class="form-label required-star">Mobile no.</label><input type="tel" id="mobileNumber" class="form-input" placeholder="09171234567"></div>
                             <div><label class="form-label">Landline no.</label><input type="tel" id="landLineNumber" class="form-input" placeholder="(049) 536 1234"></div>
-                            <div class="sm:col-span-2"><label class="form-label required-star">Present address</label><input type="text" id="presentAddress" class="form-input" placeholder="Dorm, apartment, etc."></div>
-                            <div class="sm:col-span-2"><label class="form-label required-star">Permanent address</label><input type="text" id="permanentAddress" class="form-input" placeholder="Province / home address"></div>
+                            <div class="sm:col-span-3"><label class="form-label required-star">Present address</label><input type="text" id="presentAddress" class="form-input" placeholder="Dorm, apartment, etc."></div>
+                            <div class="sm:col-span-3"><label class="form-label required-star">Permanent address</label><input type="text" id="permanentAddress" class="form-input" placeholder="Province / home address"></div>
                         </div>
 
-                        <!-- classification + college + department/unit -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-4">
-                            <div><label class="form-label required-star">Classification</label><select id="classification" class="form-select"><option value="">Select</option><option>Student</option><option>Professor</option><option>Instructor</option><option>Teacher</option><option>Gov't Employee</option><option>Stranger</option></select></div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
                             <div><label class="form-label required-star">College</label><input type="text" id="college" class="form-input" placeholder="e.g., CAS, CEAT"></div>
                             <div><label class="form-label required-star">Department/Unit</label><input type="text" id="department" class="form-input" placeholder="e.g., Dept of Social Sciences"></div>
                         </div>
@@ -132,9 +130,8 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div><label class="form-label required-star">Full name of person being complained</label><input type="text" id="complainedFullName" class="form-input" placeholder="Last, First M.I. or unknown"></div>
                             <div><label class="form-label required-star">Sex</label><select id="complainedSex" class="form-select"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-                            <div><label class="form-label required-star">Classification</label><select id="complainedClassification" class="form-select"><option value="">Select</option><option>Student</option><option>Faculty</option><option>REPS</option><option>Admin</option><option>ICS</option><option>Non UP</option></select></div>
                             <div><label class="form-label">College</label><input type="text" id="complainedCollege" class="form-input" placeholder="if applicable"></div>
-                            <div class="sm:col-span-2"><label class="form-label">Department/Unit</label><input type="text" id="complainedDepartment" class="form-input" placeholder="e.g., Dept, office, or org"></div>
+                            <div><label class="form-label">Department/Unit</label><input type="text" id="complainedDepartment" class="form-input" placeholder="e.g., Dept, office, or org"></div>
                         </div>
 
                         <hr class="section-divider">
@@ -144,9 +141,29 @@
                             <i class="fas fa-user-tag"></i> Additional Information
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="form-label required-star">Victim Classification</label>
+                                <select id="classification" class="form-select">
+                                    <option value="">Select</option>
+                                    <option>Student</option>
+                                    <option>Professor</option>
+                                    <option>Instructor</option>
+                                    <option>Teacher</option>
+                                    <option>Gov't Employee</option>
+                                    <option>Stranger</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="form-label required-star">Complained Classification</label>
+                                <select id="complainedClassification" class="form-select">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>
+
                             <!-- Is the Victim a UP Constituent? - Radio Group -->
                             <div>
-                                <label class="form-label required-star">Is the Victim a UP Constituent?</label>
+                                <label class="form-label required-star">Victim is UP Constituent?</label>
                                 <div class="flex flex-wrap gap-4 mt-1">
                                     <label class="inline-flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="victimConstituent" value="Yes" class="form-radio text-up focus:ring-up">
@@ -161,7 +178,7 @@
 
                             <!-- Is the Perpetiator a UP Constituent? - Radio Group -->
                             <div>
-                                <label class="form-label required-star">Is the Perpetiator a UP Constituent?</label>
+                                <label class="form-label required-star">Perpetiator is UP Constituent?</label>
                                 <div class="flex flex-wrap gap-4 mt-1">
                                     <label class="inline-flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="complainedConstituent" value="Yes" class="form-radio text-up focus:ring-up">
@@ -169,21 +186,6 @@
                                     </label>
                                     <label class="inline-flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="complainedConstituent" value="No" class="form-radio text-up focus:ring-up">
-                                        <span>No</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Did the incident happen inside campus premises? - Radio Group -->
-                            <div>
-                                <label class="form-label required-star">Did the incident happen inside campus premises?</label>
-                                <div class="flex flex-wrap gap-4 mt-1">
-                                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="complainedInsideCampus" value="Yes" class="form-radio text-up focus:ring-up">
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="complainedInsideCampus" value="No" class="form-radio text-up focus:ring-up">
                                         <span>No</span>
                                     </label>
                                 </div>
@@ -204,22 +206,50 @@
                                     <option value="other">Other</option>
                                 </select>
                             </div>
+
+                            <!-- Incident Location -->
+                            <div>
+                                <label class="form-label required-star">Incident Location?</label>
+                                <select class="form-select" id="complainedInsideCampus" required>
+                                    <option value="" disabled="" selected="">— Select location —</option>
+                                    <option value="Inside the campus">Inside the campus</option>
+                                    <option value="Outside the campus, but UPLB activity">Outside the campus, but UPLB activity</option>
+                                    <option value="Outside the campus and not UPLB activity">Outside the campus and not UPLB activity</option>
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="form-label required-start">Exact Location</label>
+                                <select class="form-select" id="complainedExactLocation" required>
+
+                                </select>
+                            </div>
                         </div>
 
                         <hr class="section-divider">
+
 
                         <!-- ========== COMPLAINANT'S STORY ========== -->
                         <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-pen-to-square"></i> Complainant's story</h3>
                         <div class="space-y-5">
                             <div><label class="form-label required-star">Describe in detail the incident</label><textarea id="complainantStory" rows="4" class="form-textarea" placeholder="What happened? Include date, time, location, witnesses..."></textarea></div>
+                        <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-scale-balanced"></i> Options to proceed with the complaint</h3>
+                            <div class="md:col-span-2,">
+                                <label class="block text-xs font-medium text-[#5F4E4E] mb-1">Incident Date & Time <span class="text-up">*</span></label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="date" id="incidentDate" name="incidentDate" required class="w-full px-3 py-2 border border-[#E0D5D5] rounded-lg bg-white text-sm focus:border-up focus:ring-1 focus:ring-up outline-none">
+                                    <input type="time" id="incidentTime" name="incidentTime" required class="w-full px-3 py-2 border border-[#E0D5D5] rounded-lg bg-white text-sm focus:border-up focus:ring-1 focus:ring-up outline-none">
+                                </div>
+                            </div>
                             <div><label class="form-label required-star">Is there an event when the incident happened?</label><input type="text" id="complainedIncidentHappened" class="form-input" placeholder="e.g., February Fair, Loyalty Day, Parade, none"></div>
                             <div><label class="form-label required-star">If stranger/unknown, describe physical appearance of the perpetrator/harasser</label><textarea id="complainedPhysicalAppearance" rows="2" class="form-textarea" placeholder="Height, build, clothing, distinguishing features..."></textarea></div>
                         </div>
 
                         <hr class="section-divider">
+                        
 
                         <!-- ========== OPTIONS TO PROCEED ========== -->
-                        <h3 class="text-lg font-semibold text-up mb-4 flex items-center gap-2"><i class="fas fa-scale-balanced"></i> Options to proceed with the complaint</h3>
+                        
                         <div class="space-y-4">
                             <div>
                                 <label class="form-label required-star">Options to proceed with the complainant</label>

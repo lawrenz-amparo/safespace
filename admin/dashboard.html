@@ -37,6 +37,121 @@
             }
         }
     </script>
+    <style>
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid #EDE4E4;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -6px rgba(0,0,0,0.1);
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0.75rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #5C4E4E;
+            transition: all 0.2s;
+        }
+        .sidebar-link:hover {
+            background-color: #F9F5F5;
+            color: #6F1A1F;
+        }
+        .sidebar-link.active {
+            background-color: #F1E4E5;
+            color: #6F1A1F;
+        }
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #EDE4E4;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 1rem;
+            z-index: 30;
+        }
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            color: #9B8A8A;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+        }
+        .mobile-nav-item i {
+            font-size: 1.25rem;
+        }
+        .mobile-nav-item.active {
+            color: #6F1A1F;
+            background-color: #F1E4E5;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            min-height: 300px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #F1E4E5;
+            border-top-color: #6F1A1F;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .trend-neutral {
+            font-size: 0.7rem;
+            color: #8F7E7E;
+            background: #F9F5F5;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+        }
+        .category-tag {
+            background: #F1E4E5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6F1A1F;
+        }
+        .offense-tag {
+            background: #FFF3E0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #B76E0E;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+            .stat-card {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- main layout -->
@@ -118,7 +233,7 @@
                     <p class="text-[#655A5A] text-sm mt-1">Key metrics and monitoring for OASH</p>
                 </div>
 
-                <!-- STATS CARDS - loading state -->
+                <!-- STATS CARDS -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="statsContainer">
                     <div class="stat-card text-center py-8">
                         <div class="loading-spinner mx-auto mb-3"></div>
@@ -126,9 +241,9 @@
                     </div>
                 </div>
 
-                <!-- CHARTS SECTION -->
+                <!-- CHARTS SECTION - First Row -->
                 <div class="grid lg:grid-cols-2 gap-4 md:gap-6 mb-6">
-                    <!-- Line chart card -->
+                    <!-- Line chart card - Weekly Reports -->
                     <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5 w-full overflow-hidden">
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="font-semibold text-[#2A2424] flex items-center gap-2 text-sm md:text-base">
@@ -143,7 +258,7 @@
                         </div>
                     </div>
 
-                    <!-- Bar chart card -->
+                    <!-- Bar chart card - Appointments by Mode -->
                     <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5 w-full overflow-hidden">
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="font-semibold text-[#2A2424] flex items-center gap-2 text-sm md:text-base">
@@ -154,6 +269,58 @@
                         <div class="chart-wrapper">
                             <div class="chart-container" style="min-width: 300px;">
                                 <canvas id="appointmentsBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW SECTION: Cases by Category and Offense Level -->
+                <div class="grid lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+                    <!-- Cases by Category Card -->
+                    <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-semibold text-[#2A2424] flex items-center gap-2 text-sm md:text-base">
+                                <i class="fas fa-tags text-up"></i> Cases by Category
+                            </h2>
+                            <span class="text-xs bg-up-muted text-up px-3 py-1 rounded-full">classification</span>
+                        </div>
+                        <div id="casesByCategoryContainer" class="space-y-3">
+                            <div class="text-center py-8">
+                                <div class="loading-spinner mx-auto mb-3"></div>
+                                <p class="text-xs text-[#8F7E7E]">Loading categories...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cases by Harassment Type Card -->
+                    <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-semibold text-[#2A2424] flex items-center gap-2 text-sm md:text-base">
+                                <i class="fas fa-gavel text-up"></i> Cases by Harassment Type
+                            </h2>
+                            <span class="text-xs bg-up-muted text-up px-3 py-1 rounded-full">predicted offense</span>
+                        </div>
+                        <div id="casesByOffenseContainer" class="space-y-3">
+                            <div class="text-center py-8">
+                                <div class="loading-spinner mx-auto mb-3"></div>
+                                <p class="text-xs text-[#8F7E7E]">Loading Harassment Types...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW SECTION: Monthly Reports -->
+                <div class="grid grid-cols-1 gap-4 md:gap-6 mb-6">
+                    <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-semibold text-[#2A2424] flex items-center gap-2 text-sm md:text-base">
+                                <i class="fas fa-calendar-alt text-up"></i> Monthly Reports
+                            </h2>
+                            <span class="text-xs bg-up-muted text-up px-3 py-1 rounded-full" id="currentYearDisplay">2026</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="monthlyReportsChart"></canvas>
                             </div>
                         </div>
                     </div>

@@ -2,6 +2,9 @@
 (function() {
     'use strict';
 
+    // Store AI result to reuse when form fields change
+    let currentAiResult = null;
+
     // Mobile menu toggle
     const menuBtn = document.getElementById('menuBtn');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -142,15 +145,21 @@
         // Add severity badge
         addSeverityBadge(severityLabel, severityConfidence);
         
-        // Map laws based on form data and classification
-        mapLawsBasedOnContext();
+        // Store AI result for later use
+        currentAiResult = {
+            category: offenseLabel,
+            severity: severityLabel
+        };
+        
+        // Map laws with the AI result
+        mapLawsWithAI();
     }
 
-    // Map laws using the LawMapper module
-    function mapLawsBasedOnContext() {
-        if (window.LawMapper && window.LawMapper.analyzeAndDisplayLaws) {
-            window.LawMapper.analyzeAndDisplayLaws();
-        } else {
+    // Map laws using the stored AI result
+    function mapLawsWithAI() {
+        if (window.LawMapper && window.LawMapper.analyzeAndDisplayLaws && currentAiResult) {
+            window.LawMapper.analyzeAndDisplayLaws(currentAiResult);
+        } else if (!window.LawMapper) {
             console.warn('LawMapper not loaded yet');
         }
     }
@@ -191,7 +200,8 @@
 
     // Call backend API
     async function callHarassmentAPI(description) {
-        const API_URL = 'http://127.0.0.1:8000/predict';
+        const API_URL = '/api/predict';
+        // const API_URL = 'http://178.128.114.206/predict';
         
         const requestBody = {
             description: description
@@ -265,6 +275,30 @@
         return true;
     }
 
+    async function translateToEnglish(text) {
+        if (!text.trim()) return text;
+        
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=tl&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data && data[0]) {
+                let translatedText = '';
+                for (let i = 0; i < data[0].length; i++) {
+                    if (data[0][i][0]) {
+                        translatedText += data[0][i][0];
+                    }
+                }
+                return translatedText || text;
+            }
+            return text;
+        } catch (error) {
+            console.warn('Translation failed:', error);
+            return text;
+        }
+    }
+
     // Handle form submission
     document.getElementById('reportForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -290,8 +324,11 @@
         setLoading(true);
         
         try {
+            const translatedDescription = await translateToEnglish(description);
+            console.log("Translated Text: ", translatedDescription);
+
             // Call actual API endpoint
-            const apiResult = await callHarassmentAPI(description);
+            const apiResult = await callHarassmentAPI(translatedDescription);
             
             // Update UI with real classification
             updateResultUI(apiResult, description);
@@ -304,7 +341,7 @@
             
         } catch (error) {
             console.error('Classification error:', error);
-            showError(`Classification failed: ${error.message}. Make sure the backend server is running at http://127.0.0.1:8000/predict`);
+            showError(`Classification failed: ${error.message}. Make sure the backend server is running at http://178.128.114.206/predict`);
             resultPanel.classList.add('hidden');
         } finally {
             setLoading(false);
@@ -327,10 +364,12 @@
         const victimSelect = document.getElementById('victimClass');
         const perpSelect = document.getElementById('perpClass');
         const relationshipSelect = document.getElementById('relationship');
+        const locationSelect = document.getElementById('incidentLocation');
         
         if (victimSelect) victimSelect.value = '';
         if (perpSelect) perpSelect.value = '';
         if (relationshipSelect) relationshipSelect.value = '';
+        if (locationSelect) locationSelect.value = '';
         
         // Remove severity badge if exists
         const severityBadge = document.getElementById('severityBadge');
@@ -343,33 +382,35 @@
         if (lawsContainer) {
             lawsContainer.innerHTML = '<!-- Laws will be populated here -->';
         }
+        
+        // Clear stored AI result
+        currentAiResult = null;
     });
 
     // Listen for relationship options updates to re-map laws if needed
     document.addEventListener('relationshipOptionsUpdated', function() {
-        // If result panel is visible, re-map laws with updated options
         const resultPanel = document.getElementById('resultPanel');
-        if (resultPanel && !resultPanel.classList.contains('hidden')) {
-            mapLawsBasedOnContext();
+        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
+            mapLawsWithAI();
         }
     });
     
     document.addEventListener('complainedOptionsUpdated', function() {
         const resultPanel = document.getElementById('resultPanel');
-        if (resultPanel && !resultPanel.classList.contains('hidden')) {
-            mapLawsBasedOnContext();
+        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
+            mapLawsWithAI();
         }
     });
     
     // Also listen for changes to form fields to update laws dynamically
-    const formFields = ['victimClass', 'perpClass', 'relationship'];
+    const formFields = ['victimClass', 'perpClass', 'relationship', 'incidentLocation'];
     formFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
             field.addEventListener('change', function() {
                 const resultPanel = document.getElementById('resultPanel');
-                if (resultPanel && !resultPanel.classList.contains('hidden')) {
-                    mapLawsBasedOnContext();
+                if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
+                    mapLawsWithAI();
                 }
             });
         }
@@ -382,8 +423,8 @@
     victimRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             const resultPanel = document.getElementById('resultPanel');
-            if (resultPanel && !resultPanel.classList.contains('hidden')) {
-                mapLawsBasedOnContext();
+            if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
+                mapLawsWithAI();
             }
         });
     });
@@ -391,8 +432,8 @@
     perpRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             const resultPanel = document.getElementById('resultPanel');
-            if (resultPanel && !resultPanel.classList.contains('hidden')) {
-                mapLawsBasedOnContext();
+            if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
+                mapLawsWithAI();
             }
         });
     });

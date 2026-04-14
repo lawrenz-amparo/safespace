@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/api/predict"
+  to = "http://178.128.114.206/predict"
+  status = 200
+  force = true

@@ -12,6 +12,9 @@ if (typeof toast !== 'undefined') {
 // Chart instances
 let lineChart = null;
 let barChart = null;
+let monthlyChart = null;
+let categoryChart = null;
+let offenseChart = null;
 
 // Helper Functions
 function getAuthToken() {
@@ -58,7 +61,6 @@ function renderStats(data) {
     const summary = data.summary;
     
     statsContainer.innerHTML = `
-        <!-- total reports -->
         <div class="stat-card">
             <div class="flex items-center justify-between">
                 <div>
@@ -74,7 +76,6 @@ function renderStats(data) {
             </div>
         </div>
         
-        <!-- pending reports -->
         <div class="stat-card">
             <div class="flex items-center justify-between">
                 <div>
@@ -90,7 +91,6 @@ function renderStats(data) {
             </div>
         </div>
         
-        <!-- registered users -->
         <div class="stat-card">
             <div class="flex items-center justify-between">
                 <div>
@@ -106,7 +106,6 @@ function renderStats(data) {
             </div>
         </div>
         
-        <!-- total appointments -->
         <div class="stat-card">
             <div class="flex items-center justify-between">
                 <div>
@@ -122,6 +121,182 @@ function renderStats(data) {
             </div>
         </div>
     `;
+}
+
+// Render Cases by Category
+function renderCasesByCategory(casesByCategory) {
+    const container = document.getElementById('casesByCategoryContainer');
+    const categories = Object.entries(casesByCategory);
+    const total = categories.reduce((sum, [_, count]) => sum + count, 0);
+    
+    if (categories.length === 0) {
+        container.innerHTML = '<div class="text-center py-8"><p class="text-sm text-gray-500">No category data available</p></div>';
+        return;
+    }
+    
+    // Generate colors for the chart
+    const colors = [
+        '#6F1A1F', '#8E3A3F', '#B16E72', '#D6A2A5', 
+        '#E4BCBE', '#F1E4E5', '#9B5E62', '#C28488'
+    ];
+    
+    const labels = categories.map(([category]) => category);
+    const data = categories.map(([_, count]) => count);
+    const backgroundColors = colors.slice(0, categories.length);
+    
+    container.innerHTML = `
+        <div class="flex flex-col items-center">
+            <div class="doughnut-container">
+                <canvas id="categoryDoughnutChart"></canvas>
+            </div>
+            <div class="mt-4 w-full">
+                <div class="grid grid-cols-2 gap-2">
+                    ${categories.map(([category, count], index) => `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${backgroundColors[index]}"></div>
+                            <span class="text-xs text-gray-700 flex-1">${category}</span>
+                            <span class="text-xs font-semibold text-up">${count}</span>
+                            <span class="text-xs text-gray-500">(${Math.round((count / total) * 100)}%)</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="mt-3 pt-2 border-t border-gray-200 text-center">
+                    <span class="text-sm text-gray-600">Total cases: </span>
+                    <span class="font-semibold text-up">${total}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Create or update the doughnut chart
+    const ctx = document.getElementById('categoryDoughnutChart').getContext('2d');
+    if (categoryChart) {
+        categoryChart.data.labels = labels;
+        categoryChart.data.datasets[0].data = data;
+        categoryChart.data.datasets[0].backgroundColor = backgroundColors;
+        categoryChart.update();
+    } else {
+        categoryChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+}
+
+// Render Cases by Offense Level
+function renderCasesByOffense(casesByOffenseLevel) {
+    const container = document.getElementById('casesByOffenseContainer');
+    const offenses = Object.entries(casesByOffenseLevel);
+    const total = offenses.reduce((sum, [_, count]) => sum + count, 0);
+    
+    if (offenses.length === 0) {
+        container.innerHTML = '<div class="text-center py-8"><p class="text-sm text-gray-500">No offense data available</p></div>';
+        return;
+    }
+    
+    // Generate colors for the chart
+    const colors = [
+        '#F59E0B', '#D97706', '#B45309', '#FBBF24',
+        '#FCD34D', '#FDE68A', '#92400E', '#A16207'
+    ];
+    
+    const labels = offenses.map(([offense]) => offense);
+    const data = offenses.map(([_, count]) => count);
+    const backgroundColors = colors.slice(0, offenses.length);
+    
+    container.innerHTML = `
+        <div class="flex flex-col items-center">
+            <div class="doughnut-container">
+                <canvas id="offenseDoughnutChart"></canvas>
+            </div>
+            <div class="mt-4 w-full">
+                <div class="grid grid-cols-2 gap-2">
+                    ${offenses.map(([offense, count], index) => `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${backgroundColors[index]}"></div>
+                            <span class="text-xs text-gray-700 flex-1">${offense}</span>
+                            <span class="text-xs font-semibold text-up">${count}</span>
+                            <span class="text-xs text-gray-500">(${Math.round((count / total) * 100)}%)</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="mt-3 pt-2 border-t border-gray-200 text-center">
+                    <span class="text-sm text-gray-600">Total cases: </span>
+                    <span class="font-semibold text-up">${total}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Create or update the doughnut chart
+    const ctx = document.getElementById('offenseDoughnutChart').getContext('2d');
+    if (offenseChart) {
+        offenseChart.data.labels = labels;
+        offenseChart.data.datasets[0].data = data;
+        offenseChart.data.datasets[0].backgroundColor = backgroundColors;
+        offenseChart.update();
+    } else {
+        offenseChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
 }
 
 // Update line chart with reports data
@@ -199,9 +374,66 @@ function updateBarChart(appointmentsData) {
                 labels: modes,
                 datasets: [{
                     data: counts,
-                    backgroundColor: ['#8E3A3F', '#B16E72', '#D6A2A5'],
+                    backgroundColor: ['#6F1A1F', '#6F1A1F', '#6F1A1F'],
                     borderRadius: 6,
                     barPercentage: 0.7,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // This makes it horizontal
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Appointments: ${context.parsed.x}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { 
+                        beginAtZero: true, 
+                        grid: { color: '#F0E4E4' },
+                        title: { display: true, text: 'Number of appointments', color: '#6F1A1F', font: { size: 11 } }
+                    },
+                    y: { 
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Update monthly reports chart
+function updateMonthlyChart(monthlyReports) {
+    const ctx = document.getElementById('monthlyReportsChart').getContext('2d');
+    const months = monthlyReports.map(item => item.month.substring(0, 3)); // Jan, Feb, etc.
+    const counts = monthlyReports.map(item => item.count);
+    const year = monthlyReports[0]?.year || 2026;
+    
+    document.getElementById('currentYearDisplay').innerText = year;
+    
+    if (monthlyChart) {
+        monthlyChart.data.labels = months;
+        monthlyChart.data.datasets[0].data = counts;
+        monthlyChart.update();
+    } else {
+        monthlyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Reports',
+                    data: counts,
+                    backgroundColor: '#6F1A1F',
+                    borderRadius: 6,
+                    barPercentage: 0.6,
                     categoryPercentage: 0.8
                 }]
             },
@@ -213,7 +445,7 @@ function updateBarChart(appointmentsData) {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return `Appointments: ${context.parsed.y}`;
+                                return `Reports: ${context.parsed.y}`;
                             }
                         }
                     }
@@ -222,7 +454,7 @@ function updateBarChart(appointmentsData) {
                     y: { 
                         beginAtZero: true, 
                         grid: { color: '#F0E4E4' },
-                        title: { display: true, text: 'Number of appointments', color: '#8F7E7E', font: { size: 11 } }
+                        title: { display: true, text: 'Number of reports', color: '#8F7E7E', font: { size: 11 } }
                     },
                     x: { 
                         grid: { display: false },
@@ -250,6 +482,7 @@ async function fetchDashboardData() {
 
     try {
         const response = await fetch('https://safespace-back.onrender.com/api/v1/admin/dashboard', {
+        // const response = await fetch('http://localhost:3000/api/v1/admin/dashboard', {
             method: 'GET',
             headers: { 
                 'Authorization': `Bearer ${token}`,
@@ -278,7 +511,11 @@ async function fetchDashboardData() {
             updateLineChart(data.reportsLast6Weeks);
             updateBarChart(data.appointmentsByMode);
             
-            // if (typeof toast !== 'undefined') toast.success('Dashboard updated', 'Latest data loaded successfully');
+            // Render new sections
+            renderCasesByCategory(data.casesByCategory);
+            renderCasesByOffense(data.casesByOffenseLevel);
+            updateMonthlyChart(data.monthlyReports);
+            
         } else {
             throw new Error('Failed to load dashboard data');
         }

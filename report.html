@@ -41,7 +41,7 @@
 </head>
 <body class="bg-[#FCFAFA] text-[#1A1E24] min-h-screen flex flex-col">
 
-    <!-- Fixed header -->
+    <!-- Fixed header (unchanged) -->
     <header class="fixed top-0 w-full bg-white/90 backdrop-blur-sm border-b border-[#EDE4E4] z-50">
         <div class="max-w-7xl mx-auto px-5 sm:px-8">
             <div class="flex items-center justify-between h-16">
@@ -159,9 +159,19 @@
                                     <option value="" disabled selected>— Select relationship —</option>
                                 </select>
                             </div>
+                            <!-- NEW: Incident Location -->
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-[#5F4E4E] mb-1">Incident Location <span class="text-up">*</span></label>
+                                <select id="incidentLocation" required class="w-full px-3 py-2 border border-[#E0D5D5] rounded-lg bg-white text-sm focus:border-up focus:ring-1 focus:ring-up outline-none">
+                                    <option value="" disabled selected>— Select location —</option>
+                                    <option value="inside_campus">Inside the campus</option>
+                                    <option value="outside_uplb_activity">Outside the campus, but UPLB activity</option>
+                                    <option value="outside_not_uplb">Outside the campus and not UPLB activity</option>
+                                </select>
+                            </div>
                         </div>
                         <p class="text-[10px] text-[#A18686] mt-2 flex items-center gap-1">
-                            <i class="fas fa-chart-line text-[10px]"></i> Relationship options adapt to victim classification. Used for legal mapping.
+                            <i class="fas fa-chart-line text-[10px]"></i> Relationship and location used for legal mapping.
                         </p>
                     </div>
 
@@ -207,6 +217,15 @@
                     
                     <!-- Severity Badge Container -->
                     <div id="severityContainer"></div>
+
+                    <!-- NEW: Recommended Action Container -->
+                    <div id="recommendedActionContainer" class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                        <h4 class="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-building"></i> Recommended Action
+                        </h4>
+                        <p id="recommendedActionText" class="text-sm text-blue-700">—</p>
+                        <p class="text-xs text-blue-600 mt-2"><i class="fas fa-info-circle"></i> Based on UP constituent status and incident location.</p>
+                    </div>
                     
                     <!-- Applicable Laws Container -->
                     <div id="applicableLawsContainer" class="bg-amber-50 border border-amber-200 rounded-xl p-5">
@@ -241,13 +260,16 @@
     <script src="js/report.js"></script>
     
     <script>
-        // Add reset functionality for radio buttons
+        // Add reset functionality for radio buttons and location dropdown
         document.getElementById('resetBtn')?.addEventListener('click', function(e) {
             // Reset radio buttons
             const victimRadio = document.querySelectorAll('input[name="victimUP"]');
             const perpRadio = document.querySelectorAll('input[name="perpUP"]');
             victimRadio.forEach(radio => radio.checked = false);
             perpRadio.forEach(radio => radio.checked = false);
+            // Reset location dropdown
+            const locationSelect = document.getElementById('incidentLocation');
+            if (locationSelect) locationSelect.value = '';
         });
     </script>
 </body>

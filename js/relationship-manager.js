@@ -6,14 +6,17 @@
     const STUDENT_OPTIONS = [
         { value: "classmate", text: "Classmate" },
         { value: "orgmate", text: "Organization Mate" },
+        { value: "student_to_faculty", text: "Student to faculty/staff" },
         { value: "stranger", text: "Stranger" },
         { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
         { value: "authority", text: "With authority, influence, or moral ascendancy over victim" }
     ];
 
-    // Relationship options for Non-Student victims
+    // Relationship options for Non-Student victims (faculty, staff, etc.)
     const NON_STUDENT_OPTIONS = [
         { value: "same-level", text: "Same level / Colleague" },
+        { value: "staff_to_supervisor", text: "Staff to immediate supervisor/boss" },
+        { value: "faculty_to_student", text: "Faculty/Staff to Student" },   // NEW
         { value: "authority", text: "With authority, influence, or moral ascendancy over victim" },
         { value: "intimate", text: "Within intimate, dating, marital, family relationship, or former intimate relationship" },
         { value: "none", text: "No specific relationship" },
@@ -52,10 +55,8 @@
 
         const selectedVictim = victimSelect.value;
         
-        // Clear current options
         relationshipSelect.innerHTML = '';
         
-        // Determine which options to use
         let optionsToUse = [];
         
         if (selectedVictim === 'Student') {
@@ -63,7 +64,6 @@
         } else if (selectedVictim && selectedVictim !== '') {
             optionsToUse = NON_STUDENT_OPTIONS;
         } else {
-            // No selection yet - add placeholder only
             const placeholder = document.createElement('option');
             placeholder.value = "";
             placeholder.textContent = "— Select relationship —";
@@ -73,7 +73,6 @@
             return;
         }
         
-        // Add placeholder option
         const placeholderOpt = document.createElement('option');
         placeholderOpt.value = "";
         placeholderOpt.textContent = "— Select relationship —";
@@ -81,7 +80,6 @@
         placeholderOpt.selected = true;
         relationshipSelect.appendChild(placeholderOpt);
         
-        // Add the dynamic options
         optionsToUse.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
@@ -89,7 +87,6 @@
             relationshipSelect.appendChild(option);
         });
         
-        // Dispatch event for law mapper to know relationship options updated
         const event = new CustomEvent('relationshipOptionsUpdated', { 
             detail: { victimType: selectedVictim, optionsCount: optionsToUse.length }
         });
@@ -104,10 +101,8 @@
 
         const selectedVictim = victimSelect.value;
         
-        // Clear current options
         perpSelect.innerHTML = '';
         
-        // Determine which options to use
         let optionsToUse = [];
         
         if (selectedVictim === 'Student') {
@@ -115,7 +110,6 @@
         } else if (selectedVictim && selectedVictim !== '') {
             optionsToUse = COMPLAINED_OPTIONS.nonStudent;
         } else {
-            // No selection yet - add placeholder only
             const placeholder = document.createElement('option');
             placeholder.value = "";
             placeholder.textContent = "— Select category —";
@@ -125,7 +119,6 @@
             return;
         }
         
-        // Add placeholder option
         const placeholderOpt = document.createElement('option');
         placeholderOpt.value = "";
         placeholderOpt.textContent = "— Select category —";
@@ -133,7 +126,6 @@
         placeholderOpt.selected = true;
         perpSelect.appendChild(placeholderOpt);
         
-        // Add the dynamic options
         optionsToUse.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
@@ -141,19 +133,14 @@
             perpSelect.appendChild(option);
         });
         
-        // Dispatch event for law mapper
         const event = new CustomEvent('complainedOptionsUpdated', { 
             detail: { victimType: selectedVictim, optionsCount: optionsToUse.length }
         });
         document.dispatchEvent(event);
     }
 
-    /**
-     * Reset relationship dropdown to initial placeholder state
-     */
     function resetRelationshipDropdown() {
         if (!relationshipSelect) return;
-        
         relationshipSelect.innerHTML = '';
         const placeholder = document.createElement('option');
         placeholder.value = "";
@@ -163,12 +150,8 @@
         relationshipSelect.appendChild(placeholder);
     }
 
-    /**
-     * Reset complained dropdown to initial placeholder state
-     */
     function resetComplainedDropdown() {
         if (!perpSelect) return;
-        
         perpSelect.innerHTML = '';
         const placeholder = document.createElement('option');
         placeholder.value = "";
@@ -178,33 +161,18 @@
         perpSelect.appendChild(placeholder);
     }
 
-    /**
-     * Get current relationship value
-     * @returns {string} Selected relationship value or empty string
-     */
     function getCurrentRelationship() {
         return relationshipSelect ? relationshipSelect.value : '';
     }
 
-    /**
-     * Get current victim classification
-     * @returns {string} Selected victim classification or empty string
-     */
     function getCurrentVictimClass() {
         return victimSelect ? victimSelect.value : '';
     }
 
-    /**
-     * Get current complained classification
-     * @returns {string} Selected complained classification or empty string
-     */
     function getCurrentComplainedClass() {
         return perpSelect ? perpSelect.value : '';
     }
 
-    /**
-     * Initialize relationship manager
-     */
     function init() {
         victimSelect = document.getElementById('victimClass');
         relationshipSelect = document.getElementById('relationship');
@@ -215,17 +183,14 @@
             return;
         }
         
-        // Initialize with placeholders
         resetRelationshipDropdown();
         resetComplainedDropdown();
         
-        // Add event listener for victim classification change
         victimSelect.addEventListener('change', function() {
             updateRelationshipOptions();
             updateComplainedOptions();
         });
         
-        // Also update when victim classification is set programmatically
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
@@ -239,7 +204,6 @@
         console.log('Relationship Manager initialized');
     }
 
-    // Export public methods
     window.RelationshipManager = {
         init: init,
         getCurrentRelationship: getCurrentRelationship,
@@ -255,7 +219,6 @@
         }
     };
 
-    // Auto-initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

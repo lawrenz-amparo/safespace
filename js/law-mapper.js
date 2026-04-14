@@ -2,430 +2,417 @@
 (function() {
     'use strict';
 
-    // Mapping ng law names sa kanilang corresponding policy arrays
-    const lawToPolicyMapping = {
-        'Anti Sexual Harassment Code': antiSexualHarassmentCode || [],
-        'OASH Code for Students': antiSexualHarassmentCode || [],
-        'OASH Code for Employees': antiSexualHarassmentCode || [],
-        'RA 11313 (Safe Spaces Act)': irrRA11313 || [],
-        'RA 7877 (Anti-Sexual Harassment Act)': ra7877 || [],
-        'RA 9262 (VAWC) - If victim is a woman/child': ra9262 || [],
-        'RACCS (RA 9710)': raccs || []
+    // ---------- Office Details ----------
+    const officeDetails = {
+        'OASH': {
+            name: 'Office for Anti-Sexual Harassment (OASH)',
+            address: 'Mezzanine, Graduate School Bldg., International House Complex, UPLB, Los Baños, Laguna',
+            phone: '+63 49 501 1844',
+            email: 'oash.uplb@up.edu.ph'
+        },
+        'SSO': {
+            name: 'Security and Safety Office (SSO)',
+            address: 'Andres P. Aglibut Ave. University of the Philippines Los Baños, College, Los Baños, Laguna, 4031, Philippines',
+            phone: 'Hotline: (049) 536 2243<br>Office: (049) 536 2803<br>Globe: 0975 928 7880<br>Smart: 0921 890 1259',
+            email: 'sso.uplb@up.edu.ph'
+        },
+        'SDT': {
+            name: 'Student Disciplinary Tribunal (SDT)',
+            address: 'Room 2, 2/F, Student Union Building, UPLB, Laguna, 4031, Philippines',
+            phone: '+63 999 221 1484',
+            email: 'sdt.uplb@up.edu.ph'
+        },
+        'HRDO': {
+            name: 'Human Resources Development Office (HRDO)',
+            address: '1/F Abelardo G. Samonte Hall University of the Philippines Los Baños, College, Batong Malake, Los Baños, Laguna, Philippines 4031',
+            phone: '+63 998 571 8619 / +63 998 57 51071',
+            email: 'hrdo.uplb@up.edu.ph'
+        },
+        'External': {
+            name: 'External Agency',
+            address: 'Contact the Philippine National Police (PNP) or the Commission on Human Rights (CHR)',
+            phone: 'PNP: 911 or local police station',
+            email: ''
+        }
     };
 
-    function determineApplicableLaws(data) {
-        const {
-            victimClassification,
-            complainedClassification,
-            victimConstituent,
-            complainedConstituent,
-            relationshipType
-        } = data;
-        
-        let applicableLaws = [];
-        
-        // Check if victim is Student
-        if (victimClassification === 'Student') {
-            const validComplainedForStudent = [
-                'Student', 'Professor', 'Instructor', 'Teacher', 
-                "Gov't Employee", 'Stranger', 'Co-worker', 'Colleague'
-            ];
-            
-            if (validComplainedForStudent.includes(complainedClassification)) {
-                if (complainedConstituent === 'Yes') {
-                    // Perpetrator is UP Constituent
-                    if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Students'];
-                    } else if (relationshipType === 'intimate') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'OASH Code for Students'];
-                    } else if (relationshipType === 'authority') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'OASH Code for Employees'];
-                    } else if (relationshipType === 'stranger') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Students'];
-                    } else if (relationshipType === 'same-level') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Employees'];
-                    } else if (relationshipType === 'none') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Students'];
-                    }
-                } else if (complainedConstituent === 'No') {
-                    // Perpetrator is NOT UP Constituent - pero may laws pa rin!
-                    if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'External Assistance - Contact Student Services Office (SSO)'];
-                    } else if (relationshipType === 'intimate') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'External Assistance - Contact SSO'];
-                    } else if (relationshipType === 'authority') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'External Assistance - Contact SSO'];
-                    } else if (relationshipType === 'stranger') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'External Assistance - File complaint with local authorities'];
-                    } else if (relationshipType === 'same-level') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'External Assistance - Contact SSO'];
-                    } else if (relationshipType === 'none') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'External Assistance - Contact SSO'];
-                    }
-                }
-            } else {
-                applicableLaws = ['Please select a valid complained classification'];
-            }
-        } 
-        // Non-student victims
-        else {
-            const validComplainedForNonStudent = [
-                'Co-worker', 'Colleague', "Gov't Employee", 
-                'Student', 'Stranger', 'Professor', 'Instructor', 'Teacher'
-            ];
-            
-            if (validComplainedForNonStudent.includes(complainedClassification)) {
-                if (complainedConstituent === 'Yes') {
-                    // Perpetrator is UP Constituent
-                    if (relationshipType === 'same-level') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'OASH Code for Employees'];
-                    } else if (relationshipType === 'authority') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'OASH Code for Employees'];
-                    } else if (relationshipType === 'intimate') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'RACCS (RA 9710)', 'OASH Code for Employees'];
-                    } else if (relationshipType === 'none') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Employees'];
-                    } else if (relationshipType === 'stranger') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Employees'];
-                    } else if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Students'];
-                    }
-                } else if (complainedConstituent === 'No') {
-                    // Perpetrator is NOT UP Constituent - pero may laws pa rin!
-                    if (relationshipType === 'same-level') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'External Assistance - Contact appropriate government agency'];
-                    } else if (relationshipType === 'authority') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'External Assistance - Contact appropriate government agency'];
-                    } else if (relationshipType === 'intimate') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'RACCS (RA 9710)', 'External Assistance - Contact appropriate government agency'];
-                    } else if (relationshipType === 'none') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'External Assistance - Contact appropriate government agency'];
-                    } else if (relationshipType === 'stranger') {
-                        applicableLaws = ['RA 11313 (Safe Spaces Act)', 'External Assistance - File complaint with local authorities (PNP/City Hall)'];
-                    }
-                }
-            } else {
-                applicableLaws = ['Please select a valid complained classification'];
-            }
+    // ---------- Helper: Infer harassment type(s) from a policy ----------
+    function inferHarassmentType(policy) {
+        const types = [];
+        const text = (policy.title + ' ' + (policy.content || '') + ' ' + (policy.keywords || []).join(' ')).toLowerCase();
+
+        if (/(grop|touch|pinch|physical|body|private parts|sexual assault|force|torture|kissing)/.test(text)) types.push('Physical');
+        if (/(catcall|remark|slur|verbal|sexist|homophobic|transphobic|misogynistic|joke|comment|request|demand)/.test(text)) types.push('Verbal');
+        if (/(leer|ogling|gesture|flash|expos|image|picture|graffiti|stalking|brushing|lewd|obscene)/.test(text)) types.push('Non-Verbal');
+        if (/(online|cyber|internet|digital|social media|email|message|dm|upload|share|post|telephone|cellular|fax)/.test(text)) types.push('Cyber');
+        return types;
+    }
+
+    // ---------- Filter policies by AI result ----------
+    function filterPoliciesByAI(policies, aiResult) {
+        if (!aiResult) return policies;
+        let filtered = policies;
+        if (aiResult.severity) {
+            const severityMap = {
+                'Light': 'Light Offense',
+                'Less Grave': 'Less Grave Offense',
+                'Grave': 'Grave Offense'
+            };
+            const expected = severityMap[aiResult.severity];
+            if (expected) filtered = filtered.filter(p => p.offense_category === expected);
         }
-        
-        // Remove duplicates
+        if (aiResult.category && aiResult.category !== 'Not Harassment') {
+            const aiCat = aiResult.category;
+            filtered = filtered.filter(p => {
+                const types = inferHarassmentType(p);
+                return types.length === 0 || types.includes(aiCat);
+            });
+        }
+        return filtered;
+    }
+
+    // ---------- Determine action ----------
+    function determineAction(data) {
+        const { complainedConstituent, complainedClassification, incidentLocation } = data;
+        const isPerpUP = complainedConstituent === 'Yes';
+        const isPerpStudent = complainedClassification === 'Student';
+        const isPerpEmployee = ['Professor', 'Instructor', 'Teacher', "Gov't Employee"].includes(complainedClassification);
+
+        if (!isPerpUP) {
+            return {
+                office: 'SSO',
+                action: 'Since the perpetrator is not a constituent of UPLB, you may report this incident to the Security and Safety Office (SSO).'
+            };
+        }
+        switch (incidentLocation) {
+            case 'inside_campus':
+            case 'outside_uplb_activity':
+                return { office: 'OASH', action: 'Report this incident to the Office for Anti-Sexual Harassment (OASH).' };
+            case 'outside_not_uplb':
+                if (isPerpStudent) {
+                    return { office: 'SDT', action: 'Since the incident happened outside the university and the perpetrator is a UPLB student, you may report to the Student Disciplinary Tribunal (SDT).' };
+                } else if (isPerpEmployee) {
+                    return { office: 'HRDO', action: 'Since the incident happened outside the university and the perpetrator is a UPLB employee, you may report to the Human Resources Development Office (HRDO).' };
+                } else {
+                    return { office: 'OASH', action: 'Report this incident to the Office for Anti-Sexual Harassment (OASH) for guidance.' };
+                }
+            default:
+                return { office: 'OASH', action: 'Contact the Office for Anti-Sexual Harassment (OASH) for guidance.' };
+        }
+    }
+
+    // ---------- Determine applicable laws ----------
+    function determineApplicableLaws(data, aiResult) {
+        const { victimClassification, complainedClassification, relationshipType } = data;
+        const isStudentVictim = victimClassification === 'Student';
+        const isStudentPerp = complainedClassification === 'Student';
+        const isEmployeePerp = ['Professor', 'Instructor', 'Teacher', "Gov't Employee"].includes(complainedClassification);
+        const isIntimate = relationshipType === 'intimate';
+        const isAuthority = relationshipType === 'authority' || relationshipType === 'student_to_faculty' || relationshipType === 'staff_to_supervisor';
+        const isSameLevel = relationshipType === 'same-level';
+
+        let applicableLaws = ['RA 11313 (Safe Spaces Act)'];
+
+        if (aiResult && aiResult.category && aiResult.category !== 'Not Harassment') {
+            const cat = aiResult.category;
+            if (cat === 'Cyber') applicableLaws.push('RA 9995 (Anti-Photo and Video Voyeurism Act) - if applicable');
+            if (cat === 'Physical' && isIntimate && (isStudentVictim || isEmployeePerp)) applicableLaws.push('RA 9262 (VAWC) - If victim is a woman/child');
+        }
+
+        if (isStudentVictim) {
+            if (isStudentPerp || ['Stranger', 'Co-worker', 'Colleague'].includes(complainedClassification) || relationshipType === 'classmate' || relationshipType === 'orgmate') {
+                applicableLaws.push('OASH Code for Students');
+            }
+            if (isAuthority && !isStudentPerp) {
+                applicableLaws.push('RA 7877 (Anti-Sexual Harassment Act)');
+                applicableLaws.push('RACCS (RA 9710)');
+                applicableLaws.push('OASH Code for Employees');
+            }
+            if (isIntimate) {
+                applicableLaws.push('RA 9262 (VAWC) - If victim is a woman/child');
+                if (isStudentPerp) applicableLaws.push('OASH Code for Students');
+                else if (isEmployeePerp) applicableLaws.push('OASH Code for Employees');
+            }
+        } else {
+            if (isEmployeePerp || isSameLevel) {
+                applicableLaws.push('RA 7877 (Anti-Sexual Harassment Act)');
+                applicableLaws.push('RACCS (RA 9710)');
+                applicableLaws.push('OASH Code for Employees');
+            }
+            if (isAuthority && isEmployeePerp) {
+                applicableLaws.push('RA 7877 (Anti-Sexual Harassment Act)');
+                applicableLaws.push('RACCS (RA 9710)');
+                applicableLaws.push('OASH Code for Employees');
+            }
+            if (isIntimate) {
+                applicableLaws.push('RA 9262 (VAWC) - If victim is a woman/child');
+                if (isStudentPerp) applicableLaws.push('OASH Code for Students');
+                else if (isEmployeePerp) applicableLaws.push('OASH Code for Employees');
+            }
+            if (isStudentPerp && !isIntimate) applicableLaws.push('OASH Code for Students');
+        }
+
         applicableLaws = [...new Set(applicableLaws)];
-        
-        // Separate external assistance from actual laws
         const actualLaws = applicableLaws.filter(law => !law.includes('External Assistance'));
         const externalAssistance = applicableLaws.filter(law => law.includes('External Assistance'));
-        
-        return { 
-            applicableLaws: actualLaws,
-            externalAssistance: externalAssistance
-        };
+        const actionInfo = determineAction(data);
+
+        return { applicableLaws: actualLaws, externalAssistance, recommendedAction: actionInfo };
     }
 
-    // Helper function to get relevant policies from the law arrays
-    function getPoliciesForLaws(lawNames) {
+    // ---------- Get policies for laws with different strictness levels ----------
+    function getPoliciesForLaws(lawNames, aiResult, context, strictness = 'strict+ai') {
+        // Guard against undefined context
+        if (!context) {
+            console.warn('getPoliciesForLaws: context is undefined – cannot determine victim status');
+            return [];
+        }
+
         let allPolicies = [];
-        
+        const isStudentVictim = context.victimClassification === 'Student';
+
         lawNames.forEach(lawName => {
             let policyArray = null;
-            let displayName = lawName;
-            
-            // Determine which policy array to use
             if (lawName.includes('OASH Code for Students')) {
                 policyArray = antiSexualHarassmentCode;
-                // Filter for student-specific policies
                 if (policyArray) {
-                    const studentPolicies = policyArray.filter(p => 
-                        p.applicable_to && p.applicable_to.includes('students')
-                    );
+                    const studentPolicies = policyArray.filter(p => p.applicable_to && p.applicable_to.includes('students'));
                     allPolicies.push(...studentPolicies.map(p => ({ ...p, law_display_name: lawName })));
                 }
-            } 
-            else if (lawName.includes('OASH Code for Employees')) {
+            } else if (lawName.includes('OASH Code for Employees')) {
                 policyArray = antiSexualHarassmentCode;
-                // Filter for employee-specific policies
                 if (policyArray) {
-                    const employeePolicies = policyArray.filter(p => 
-                        p.applicable_to && p.applicable_to.includes('employees')
-                    );
+                    const employeePolicies = policyArray.filter(p => p.applicable_to && p.applicable_to.includes('employees'));
                     allPolicies.push(...employeePolicies.map(p => ({ ...p, law_display_name: lawName })));
                 }
-            }
-            else if (lawName.includes('RA 11313') || lawName.includes('Safe Spaces Act')) {
-                policyArray = irrRA11313;
-                if (policyArray) {
-                    allPolicies.push(...policyArray.map(p => ({ ...p, law_display_name: lawName })));
-                }
-            }
-            else if (lawName.includes('RA 7877')) {
-                policyArray = ra7877;
-                if (policyArray) {
-                    allPolicies.push(...policyArray.map(p => ({ ...p, law_display_name: lawName })));
-                }
-            }
-            else if (lawName.includes('RA 9262') || lawName.includes('VAWC')) {
-                policyArray = ra9262;
-                if (policyArray) {
-                    allPolicies.push(...policyArray.map(p => ({ ...p, law_display_name: lawName })));
-                }
-            }
-            else if (lawName.includes('RACCS')) {
-                policyArray = raccs;
-                if (policyArray) {
-                    allPolicies.push(...policyArray.map(p => ({ ...p, law_display_name: lawName })));
-                }
+            } else {
+                if (lawName.includes('RA 11313') || lawName.includes('Safe Spaces Act')) policyArray = irrRA11313;
+                else if (lawName.includes('RA 7877')) policyArray = ra7877;
+                else if (lawName.includes('RA 9262') || lawName.includes('VAWC')) policyArray = ra9262;
+                else if (lawName.includes('RACCS')) policyArray = raccs;
+                if (policyArray) allPolicies.push(...policyArray.map(p => ({ ...p, law_display_name: lawName })));
             }
         });
-        
-        // Remove duplicates by policy_id
-        const uniquePolicies = [];
-        const seenIds = new Set();
+
+        // Filter by applicable_to
+        allPolicies = allPolicies.filter(p => {
+            if (!p.applicable_to) return false;
+            if (isStudentVictim) {
+                return p.applicable_to.some(term => ['students', 'teaching personnel', 'non-teaching personnel'].includes(term));
+            } else {
+                const employeeTerms = ['employees', 'teaching personnel', 'non-teaching personnel', 'government employees', 'government officials'];
+                return p.applicable_to.some(term => employeeTerms.includes(term));
+            }
+        });
+
+        if (strictness === 'strict+ai') {
+            allPolicies = allPolicies.filter(p => p.offense_category !== undefined && p.offense_category !== null);
+            allPolicies = filterPoliciesByAI(allPolicies, aiResult);
+        } else if (strictness === 'strict') {
+            allPolicies = allPolicies.filter(p => p.offense_category !== undefined && p.offense_category !== null);
+        } // else medium or loose: no extra filter
+
+        // Remove duplicates
+        const unique = [];
+        const seen = new Set();
         for (const policy of allPolicies) {
-            if (!seenIds.has(policy.policy_id)) {
-                seenIds.add(policy.policy_id);
-                uniquePolicies.push(policy);
+            if (!seen.has(policy.policy_id)) {
+                seen.add(policy.policy_id);
+                unique.push(policy);
             }
         }
-        
-        return uniquePolicies;
+        return unique;
     }
 
-    // Display laws with tabbed interface
-    function displayApplicableLaws(applicableLaws, externalAssistance) {
+    // ---------- Display applicable laws ----------
+    function displayApplicableLaws(applicableLaws, externalAssistance, recommendedAction, aiResult, context) {
         const lawsContainer = document.getElementById('applicableLawsContainer');
-        
+        const recommendedContainer = document.getElementById('recommendedActionContainer');
+        const recommendedText = document.getElementById('recommendedActionText');
+
+        if (recommendedContainer && recommendedText && recommendedAction) {
+            const officeCode = recommendedAction.office;
+            const details = officeDetails[officeCode] || officeDetails['External'];
+            let detailsHtml = `
+                <div class="space-y-3">
+                    <p class="text-sm font-medium text-blue-800">${recommendedAction.action}</p>
+                    <div class="bg-white rounded-lg p-3 border border-blue-100">
+                        <div class="flex items-start gap-2 mb-2">
+                            <i class="fas fa-building text-blue-600 mt-0.5"></i>
+                            <div class="text-xs">
+                                <span class="font-semibold">${details.name}</span><br>
+                                <span class="text-gray-600">${details.address}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2 mb-2">
+                            <i class="fas fa-phone text-blue-600 mt-0.5"></i>
+                            <div class="text-xs">${details.phone}</div>
+                        </div>
+                        ${details.email ? `
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-envelope text-blue-600 mt-0.5"></i>
+                            <div class="text-xs">${details.email}</div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+            recommendedText.innerHTML = detailsHtml;
+            recommendedContainer.classList.remove('hidden');
+        } else if (recommendedContainer) {
+            recommendedText.innerHTML = '—';
+        }
+
         if (!lawsContainer) return;
-        
+
+        if (aiResult && aiResult.category === 'Not Harassment') {
+            lawsContainer.innerHTML = '';
+            lawsContainer.style.display = 'none';
+            return;
+        }
+
+        if (!context) {
+            lawsContainer.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-triangle text-amber-600 text-xl mt-1"></i>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-amber-800 mb-2">⚠️ Missing Data</h4>
+                        <p class="text-sm text-amber-700">Unable to map laws because report details are incomplete. Please ensure the report includes victim classification, perpetrator details, relationship, and location.</p>
+                    </div>
+                </div>
+            `;
+            lawsContainer.style.display = 'block';
+            return;
+        }
+
         if (applicableLaws && applicableLaws.length > 0 && applicableLaws[0] !== 'Please select a valid complained classification') {
-            // Get actual policy details
-            const policyDetails = getPoliciesForLaws(applicableLaws);
-            
-            // Group policies by law name
-            const groupedPolicies = {};
-            policyDetails.forEach(policy => {
-                const lawName = policy.law_display_name;
-                if (!groupedPolicies[lawName]) {
-                    groupedPolicies[lawName] = [];
-                }
-                groupedPolicies[lawName].push(policy);
+            let policyDetails = getPoliciesForLaws(applicableLaws, aiResult, context, 'strict+ai');
+            let usedLevel = 'strict+ai';
+            if (policyDetails.length === 0 && aiResult) {
+                policyDetails = getPoliciesForLaws(applicableLaws, null, context, 'strict');
+                usedLevel = 'strict';
+            }
+            if (policyDetails.length === 0) {
+                policyDetails = getPoliciesForLaws(applicableLaws, null, context, 'medium');
+                usedLevel = 'medium';
+            }
+            if (policyDetails.length === 0) {
+                policyDetails = getPoliciesForLaws(applicableLaws, null, context, 'loose');
+                usedLevel = 'loose';
+            }
+
+            const grouped = {};
+            policyDetails.forEach(p => {
+                const law = p.law_display_name;
+                if (!grouped[law]) grouped[law] = [];
+                grouped[law].push(p);
             });
-            
-            const lawNames = Object.keys(groupedPolicies);
-            
-            // Create tabs HTML
+            const lawNames = Object.keys(grouped);
+
+            if (lawNames.length === 0) {
+                lawsContainer.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-blue-600 text-xl mt-1"></i>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-up-dark mb-3">Applicable Laws</h4>
+                            <ul class="list-disc pl-5 space-y-1">
+                                ${applicableLaws.map(law => `<li>${escapeHtml(law)}</li>`).join('')}
+                            </ul>
+                            <p class="text-sm text-gray-600 mt-3">No specific policy details found for the exact nature of this incident, but these laws provide protection.</p>
+                        </div>
+                    </div>
+                `;
+                lawsContainer.style.display = 'block';
+                return;
+            }
+
             let tabsHtml = `
                 <div class="flex items-start gap-3">
                     <i class="fas fa-gavel text-up text-xl mt-1"></i>
                     <div class="flex-1">
                         <h4 class="font-semibold text-up-dark mb-3">Applicable Laws & Policies</h4>
-                        
-                        <!-- Tab Headers -->
                         <div class="border-b border-gray-200 mb-4">
                             <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="lawTabs" role="tablist">
             `;
-            
-            lawNames.forEach((lawName, index) => {
-                const isActive = index === 0;
-                const icon = getLawIcon(lawName);
+            lawNames.forEach((law, idx) => {
+                const isActive = idx === 0;
+                const icon = getLawIcon(law);
                 tabsHtml += `
                     <li class="mr-2" role="presentation">
-                        <button class="inline-block p-3 rounded-t-lg border-b-2 ${isActive ? 'border-up text-up' : 'border-transparent hover:text-gray-600 hover:border-gray-300 text-gray-500'}" 
-                                id="tab-${index}" 
-                                data-tab-target="tabpanel-${index}"
-                                type="button" 
-                                role="tab" 
-                                aria-controls="tabpanel-${index}" 
-                                aria-selected="${isActive}">
-                            <i class="${icon} mr-2"></i>${lawName}
-                            <span class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">${groupedPolicies[lawName].length}</span>
+                        <button class="inline-block p-3 rounded-t-lg border-b-2 ${isActive ? 'border-up text-up' : 'border-transparent hover:text-gray-600 hover:border-gray-300 text-gray-500'}"
+                                id="tab-${idx}" data-tab-target="tabpanel-${idx}" type="button" role="tab"
+                                aria-controls="tabpanel-${idx}" aria-selected="${isActive}">
+                            <i class="${icon} mr-2"></i>${law}
+                            <span class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">${grouped[law].length}</span>
                         </button>
                     </li>
                 `;
             });
-            
-            // Add External Assistance tab if exists
-            if (externalAssistance && externalAssistance.length > 0) {
+            tabsHtml += `</ul></div><div class="tab-content">`;
+
+            lawNames.forEach((law, idx) => {
+                const isActive = idx === 0;
+                const policies = grouped[law];
                 tabsHtml += `
-                    <li class="mr-2" role="presentation">
-                        <button class="inline-block p-3 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 text-gray-500" 
-                                id="tab-external" 
-                                data-tab-target="tabpanel-external"
-                                type="button" 
-                                role="tab" 
-                                aria-controls="tabpanel-external" 
-                                aria-selected="false">
-                            <i class="fas fa-hand-holding-heart mr-2"></i>External Assistance
-                            <span class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">${externalAssistance.length}</span>
-                        </button>
-                    </li>
-                `;
-            }
-            
-            tabsHtml += `
-                            </ul>
-                        </div>
-                        
-                        <!-- Tab Panels -->
-                        <div class="tab-content">
-            `;
-            
-            // Policy tabs
-            lawNames.forEach((lawName, index) => {
-                const isActive = index === 0;
-                const policies = groupedPolicies[lawName];
-                
-                tabsHtml += `
-                    <div id="tabpanel-${index}" 
-                         role="tabpanel" 
-                         aria-labelledby="tab-${index}" 
-                         class="${isActive ? '' : 'hidden'}">
+                    <div id="tabpanel-${idx}" role="tabpanel" aria-labelledby="tab-${idx}" class="${isActive ? '' : 'hidden'}">
                         <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                 `;
-                
-                policies.forEach(policy => {
+                policies.forEach(p => {
                     tabsHtml += `
                         <div class="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 overflow-hidden">
                             <div class="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center">
                                 <h6 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                                    <i class="fas fa-file-alt text-up text-xs"></i>
-                                    ${escapeHtml(policy.title)}
+                                    <i class="fas fa-file-alt text-up text-xs"></i> ${escapeHtml(p.title)}
                                 </h6>
-                                <span class="text-xs text-up font-mono bg-up-muted px-2 py-1 rounded">${policy.policy_id}</span>
+                                <span class="text-xs text-up font-mono bg-up-muted px-2 py-1 rounded">${p.policy_id}</span>
                             </div>
                             <div class="p-4">
-                                ${policy.section ? `
-                                    <div class="mb-2">
-                                        <span class="text-xs font-semibold text-gray-500 uppercase">Section</span>
-                                        <p class="text-xs text-gray-700 mt-1">${escapeHtml(policy.section)}</p>
-                                    </div>
-                                ` : ''}
-                                
-                                <div class="mb-2">
-                                    <span class="text-xs font-semibold text-gray-500 uppercase">Content</span>
-                                    <p class="text-sm text-gray-700 mt-1 leading-relaxed">${escapeHtml(policy.content)}</p>
-                                </div>
-                                
-                                ${policy.punishment ? `
-                                    <div class="mt-2 p-2 bg-red-50 rounded border-l-2 border-red-500">
-                                        <span class="text-xs font-semibold text-red-700 uppercase flex items-center gap-1">
-                                            <i class="fas fa-gavel"></i> Penalty
-                                        </span>
-                                        <p class="text-xs text-red-600 mt-1">${escapeHtml(policy.punishment)}</p>
-                                    </div>
-                                ` : ''}
-                                
-                                ${policy.keywords && policy.keywords.length > 0 ? `
-                                    <div class="mt-2 flex flex-wrap gap-1">
-                                        ${policy.keywords.slice(0, 5).map(keyword => `
-                                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">#${escapeHtml(keyword)}</span>
-                                        `).join('')}
-                                    </div>
-                                ` : ''}
-                                
-                                ${policy.applicable_to && policy.applicable_to.length > 0 ? `
-                                    <div class="mt-2 text-xs text-gray-400">
-                                        <i class="fas fa-users mr-1"></i> Applies to: ${policy.applicable_to.join(', ')}
-                                    </div>
-                                ` : ''}
+                                ${p.section ? `<div class="mb-2"><span class="text-xs font-semibold text-gray-500 uppercase">Section</span><p class="text-xs text-gray-700 mt-1">${escapeHtml(p.section)}</p></div>` : ''}
+                                <div class="mb-2"><span class="text-xs font-semibold text-gray-500 uppercase">Content</span><p class="text-sm text-gray-700 mt-1 leading-relaxed">${escapeHtml(p.content)}</p></div>
+                                ${p.punishment ? `<div class="mt-2 p-2 bg-red-50 rounded border-l-2 border-red-500"><span class="text-xs font-semibold text-red-700 uppercase flex items-center gap-1"><i class="fas fa-gavel"></i> Penalty</span><p class="text-xs text-red-600 mt-1">${escapeHtml(p.punishment)}</p></div>` : ''}
+                                ${p.keywords && p.keywords.length ? `<div class="mt-2 flex flex-wrap gap-1">${p.keywords.slice(0,5).map(kw => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">#${escapeHtml(kw)}</span>`).join('')}</div>` : ''}
+                                ${p.applicable_to && p.applicable_to.length ? `<div class="mt-2 text-xs text-gray-400"><i class="fas fa-users mr-1"></i> Applies to: ${p.applicable_to.join(', ')}</div>` : ''}
                             </div>
                         </div>
                     `;
                 });
-                
-                tabsHtml += `
-                        </div>
-                    </div>
-                `;
+                tabsHtml += `</div></div>`;
             });
-            
-            // External Assistance tab
-            if (externalAssistance && externalAssistance.length > 0) {
-                tabsHtml += `
-                    <div id="tabpanel-external" 
-                         role="tabpanel" 
-                         aria-labelledby="tab-external" 
-                         class="hidden">
-                        <div class="space-y-3">
-                `;
-                
-                externalAssistance.forEach(assistance => {
-                    tabsHtml += `
-                        <div class="bg-blue-50 rounded-lg border border-blue-200 p-4">
-                            <div class="flex items-start gap-3">
-                                <i class="fas fa-info-circle text-blue-600 text-xl mt-1"></i>
-                                <div class="flex-1">
-                                    <h6 class="font-semibold text-blue-800 mb-2">${escapeHtml(assistance)}</h6>
-                                    <div class="mt-2 p-3 bg-white rounded-lg">
-                                        <p class="text-xs font-medium mb-2">📞 Available Resources:</p>
-                                        <ul class="text-xs space-y-1 text-gray-600">
-                                            <li>• Email: oash.uplb@up.edu.ph</li>
-                                            <li>• UP OASH: +63 49 501 1844</li>
-                                            <li>• Location: Mezzanine, Graduate School Bldg., International House Complex, UPLB, Los Baños, Laguna</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                tabsHtml += `
-                        </div>
-                    </div>
-                `;
-            }
-            
             tabsHtml += `
                         </div>
-                        
-                        <div class="mt-4 pt-3 border-t border-amber-200 text-xs text-amber-700 flex items-center justify-between">
-                            <div>
-                                <i class="fas fa-info-circle mr-1"></i> 
-                                Note: Laws are mapped based on the provided context. For formal legal advice, please consult the Office of the University Legal Counsel.
-                            </div>
-                            <button onclick="LawMapper.exportPolicies()" class="text-xs bg-up text-white px-3 py-1 rounded hover:bg-up-light transition-colors">
-                                <i class="fas fa-download mr-1"></i> Export
-                            </button>
+                        <div class="mt-4 pt-3 border-t border-amber-200 text-xs text-amber-700">
+                            <i class="fas fa-info-circle mr-1"></i> Note: Laws are mapped based on the provided context. For formal legal advice, please consult the Office of the University Legal Counsel.
                         </div>
                     </div>
                 </div>
             `;
-            
+            if (usedLevel !== 'strict+ai') {
+                let note = '';
+                if (usedLevel === 'strict') note = 'Note: AI‑specific filters removed all provisions. Showing all relevant policies without AI filtering.';
+                else if (usedLevel === 'medium') note = 'Note: No policies matched the exact offense category. Showing policies applicable to your role.';
+                else if (usedLevel === 'loose') note = 'Note: No specific policies found for your role. Showing all provisions from these laws.';
+                tabsHtml = tabsHtml.replace('<div class="mt-4 pt-3 border-t', `<div class="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">${note}</div><div class="mt-4 pt-3 border-t`);
+            }
             lawsContainer.innerHTML = tabsHtml;
             lawsContainer.style.display = 'block';
-            
-            // Add tab switching functionality
+
             const tabs = document.querySelectorAll('[data-tab-target]');
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const targetId = tab.getAttribute('data-tab-target');
-                    
-                    // Remove active class from all tabs
                     document.querySelectorAll('[role="tab"]').forEach(t => {
                         t.classList.remove('border-up', 'text-up');
                         t.classList.add('border-transparent', 'text-gray-500');
                         t.setAttribute('aria-selected', 'false');
                     });
-                    
-                    // Add active class to clicked tab
                     tab.classList.add('border-up', 'text-up');
                     tab.classList.remove('border-transparent', 'text-gray-500');
                     tab.setAttribute('aria-selected', 'true');
-                    
-                    // Hide all tab panels
-                    document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                        panel.classList.add('hidden');
-                    });
-                    
-                    // Show selected tab panel
+                    document.querySelectorAll('[role="tabpanel"]').forEach(panel => panel.classList.add('hidden'));
                     const targetPanel = document.getElementById(targetId);
-                    if (targetPanel) {
-                        targetPanel.classList.remove('hidden');
-                    }
+                    if (targetPanel) targetPanel.classList.remove('hidden');
                 });
             });
-            
-        } else if (applicableLaws && applicableLaws[0] === 'Please select a valid complained classification') {
+        } else {
             lawsContainer.innerHTML = `
                 <div class="flex items-start gap-3">
                     <i class="fas fa-exclamation-triangle text-amber-600 text-xl mt-1"></i>
@@ -439,6 +426,7 @@
         }
     }
 
+    // ---------- Helper functions ----------
     function getLawIcon(lawName) {
         if (lawName.includes('Safe Spaces Act')) return 'fas fa-street-view';
         if (lawName.includes('RA 7877')) return 'fas fa-briefcase';
@@ -450,47 +438,31 @@
 
     function escapeHtml(str) {
         if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
     }
 
     function exportPolicies() {
         const resultPanel = document.getElementById('resultPanel');
         if (!resultPanel || resultPanel.classList.contains('hidden')) return;
-        
         const lawSections = document.querySelectorAll('[role="tabpanel"]');
-        let exportText = 'UPLB OASH - Applicable Laws Report\n';
-        exportText += '='.repeat(50) + '\n';
-        exportText += `Generated: ${new Date().toLocaleString()}\n\n`;
-        
+        let exportText = 'UPLB OASH - Applicable Laws Report\n' + '='.repeat(50) + '\n' + `Generated: ${new Date().toLocaleString()}\n\n`;
         lawSections.forEach((section, index) => {
             const tabButton = document.querySelector(`[data-tab-target="tabpanel-${index}"]`);
             if (tabButton) {
                 const lawName = tabButton.textContent.replace(/[0-9]/g, '').trim();
-                exportText += `📚 ${lawName}\n`;
-                exportText += '-'.repeat(40) + '\n';
-                
+                exportText += `📚 ${lawName}\n` + '-'.repeat(40) + '\n';
                 const policies = section.querySelectorAll('.bg-white.rounded-lg');
                 policies.forEach(policy => {
                     const title = policy.querySelector('h6')?.textContent || '';
                     const content = policy.querySelector('.text-gray-700')?.textContent || '';
                     const penalty = policy.querySelector('.bg-red-50 .text-red-600')?.textContent || '';
-                    
-                    exportText += `\n▪ ${title}\n`;
-                    exportText += `  ${content.substring(0, 200)}${content.length > 200 ? '...' : ''}\n`;
-                    if (penalty) {
-                        exportText += `  Penalty: ${penalty}\n`;
-                    }
+                    exportText += `\n▪ ${title}\n  ${content.substring(0, 200)}${content.length > 200 ? '...' : ''}\n`;
+                    if (penalty) exportText += `  Penalty: ${penalty}\n`;
                     exportText += '\n';
                 });
                 exportText += '\n';
             }
         });
-        
         const blob = new Blob([exportText], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -502,257 +474,113 @@
         URL.revokeObjectURL(url);
     }
 
-    // Helper function to get form data
     function getFormData() {
-        const victimClass = document.getElementById('victimClass')?.value || '';
-        const perpClass = document.getElementById('perpClass')?.value || '';
-        const victimUP = document.querySelector('input[name="victimUP"]:checked')?.value || '';
-        const perpUP = document.querySelector('input[name="perpUP"]:checked')?.value || '';
-        const relationship = document.getElementById('relationship')?.value || '';
-        
         return {
-            victimClassification: victimClass,
-            complainedClassification: perpClass,
-            victimConstituent: victimUP,
-            complainedConstituent: perpUP,
-            relationshipType: relationship
+            victimClassification: document.getElementById('victimClass')?.value || '',
+            complainedClassification: document.getElementById('perpClass')?.value || '',
+            victimConstituent: document.querySelector('input[name="victimUP"]:checked')?.value || '',
+            complainedConstituent: document.querySelector('input[name="perpUP"]:checked')?.value || '',
+            relationshipType: document.getElementById('relationship')?.value || '',
+            incidentLocation: document.getElementById('incidentLocation')?.value || ''
         };
     }
 
-    // Main function to analyze and display laws
-    function analyzeAndDisplayLaws() {
+    // ---------- Main analysis function (accepts aiResult) ----------
+    function analyzeAndDisplayLaws(aiResult) {
         const formData = getFormData();
-        
-        if (!formData.victimClassification || !formData.complainedClassification || 
-            !formData.victimConstituent || !formData.complainedConstituent || 
-            !formData.relationshipType) {
-            displayApplicableLaws(['Please complete all legal context fields'], []);
+        if (!formData.victimClassification || !formData.complainedClassification ||
+            !formData.victimConstituent || !formData.complainedConstituent ||
+            !formData.relationshipType || !formData.incidentLocation) {
+            displayApplicableLaws(['Please complete all legal context fields'], [], null, null, formData);
             return;
         }
-        
-        const result = determineApplicableLaws(formData);
-        displayApplicableLaws(result.applicableLaws, result.externalAssistance);
-        
+        const result = determineApplicableLaws(formData, aiResult);
+        displayApplicableLaws(result.applicableLaws, result.externalAssistance, result.recommendedAction, aiResult, formData);
         return result;
     }
 
-    // Export public methods
+    // ---------- NEW: Map laws directly from a report object ----------
+    function mapLawsFromReport(report, aiResult) {
+        // Build the context object from report fields with intelligent defaults
+        const context = {
+            // Victim classification – try report.victimClassification, fallback to reporter's classification
+            victimClassification: report.victimClassification || report.classification || '',
+            complainedClassification: report.complainedClassification || '',
+            victimConstituent: report.victimConstituent || '',
+            complainedConstituent: report.complainedConstituent || '',
+            // Relationship type – try to derive from classifications if missing
+            relationshipType: report.relationshipType || deriveRelationshipType(report),
+            // Incident location – use report.incidentLocation or map from complaint fields
+            incidentLocation: report.incidentLocation || mapIncidentLocation(report)
+        };
+
+        // Validate required fields
+        const missing = [];
+        if (!context.victimClassification) missing.push('victim classification');
+        if (!context.complainedClassification) missing.push('perpetrator classification');
+        if (!context.victimConstituent) missing.push('victim constituent status');
+        if (!context.complainedConstituent) missing.push('perpetrator constituent status');
+        if (!context.incidentLocation) missing.push('incident location');
+
+        if (missing.length) {
+            console.warn('mapLawsFromReport: missing fields', missing, report);
+            displayApplicableLaws(['Incomplete report data'], [], null, aiResult, context);
+            return null;
+        }
+
+        const result = determineApplicableLaws(context, aiResult);
+        displayApplicableLaws(result.applicableLaws, result.externalAssistance, result.recommendedAction, aiResult, context);
+        return result;
+    }
+
+    // Helper to derive relationship type if not stored
+    function deriveRelationshipType(report) {
+        const victimClass = report.victimClassification || report.classification;
+        const perpClass = report.complainedClassification;
+
+        if (!victimClass || !perpClass) return 'unknown';
+
+        // If both are students, likely classmates/orgmates
+        if (victimClass === 'Student' && perpClass === 'Student') return 'same-level';
+
+        // If one is faculty/staff and the other is student -> authority
+        if ((victimClass === 'Student' && isEmployee(perpClass)) ||
+            (isEmployee(victimClass) && perpClass === 'Student')) {
+            return 'authority';
+        }
+
+        // If both are employees, could be same-level or authority (e.g., supervisor)
+        if (isEmployee(victimClass) && isEmployee(perpClass)) return 'same-level';
+
+        return 'unknown';
+    }
+
+    function isEmployee(cls) {
+        return ['Professor', 'Instructor', 'Teacher', "Gov't Employee"].includes(cls);
+    }
+
+    function mapIncidentLocation(report) {
+        // If we have a direct field, use it
+        if (report.incidentLocation) return report.incidentLocation;
+
+        // Check if we have complainedInsideCampus
+        if (report.complainedInsideCampus === 'Yes') return 'inside_campus';
+        if (report.complainedInsideCampus === 'No') {
+            // Could be outside_uplb_activity if event was UPLB-sponsored? Not enough info, default to outside_not_uplb
+            return 'outside_not_uplb';
+        }
+
+        // Fallback to empty (will be caught as missing)
+        return '';
+    }
+
+    // ---------- Expose public methods ----------
     window.LawMapper = {
-        determineApplicableLaws: determineApplicableLaws,
-        displayApplicableLaws: displayApplicableLaws,
-        getFormData: getFormData,
-        analyzeAndDisplayLaws: analyzeAndDisplayLaws,
-        exportPolicies: exportPolicies
+        determineApplicableLaws,
+        displayApplicableLaws,
+        getFormData,
+        analyzeAndDisplayLaws,
+        exportPolicies,
+        mapLawsFromReport   // <-- new method for view button
     };
 })();
-
-// // law-mapper.js
-// (function() {
-//     'use strict';
-
-//     function determineApplicableLaws(data) {
-//         const {
-//             victimClassification,
-//             complainedClassification,
-//             victimConstituent,
-//             complainedConstituent,
-//             relationshipType
-//         } = data;
-        
-//         let applicableLaws = [];
-        
-//         // Check if victim is Student
-//         if (victimClassification === 'Student') {
-//             // Valid complained classifications for student victims
-//             const validComplainedForStudent = [
-//                 'Student', 'Professor', 'Instructor', 'Teacher', 
-//                 "Gov't Employee", 'Stranger', 'Co-worker', 'Colleague'
-//             ];
-            
-//             if (validComplainedForStudent.includes(complainedClassification)) {
-//                 if (complainedConstituent === 'Yes') {
-//                     // Perpetrator is UP Constituent
-//                     if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Students'];
-//                     } else if (relationshipType === 'intimate') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'OASH Code for Students'];
-//                     } else if (relationshipType === 'authority') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'OASH Code for Employees'];
-//                     } else if (relationshipType === 'stranger') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'If UP student: OASH Code for Students', 'If UP employee: OASH Code for Employees'];
-//                     } else if (relationshipType === 'same-level') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Employees'];
-//                     } else if (relationshipType === 'none') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Students'];
-//                     }
-//                 } else if (complainedConstituent === 'No') {
-//                     // Perpetrator is NOT UP Constituent
-//                     if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'Contact Student Services Office (SSO) for external assistance'];
-//                     } else if (relationshipType === 'intimate') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'Contact SSO for external assistance'];
-//                     } else if (relationshipType === 'authority') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'Contact SSO for external assistance'];
-//                     } else if (relationshipType === 'stranger') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'Contact SSO or file complaint with local authorities'];
-//                     } else if (relationshipType === 'same-level') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'Contact SSO for external assistance'];
-//                     } else if (relationshipType === 'none') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'Contact SSO for external assistance'];
-//                     }
-//                 }
-//             } else {
-//                 applicableLaws = ['Please select a valid complained classification'];
-//             }
-//         } 
-//         // Non-student victims
-//         else {
-//             // Valid complained classifications for non-student victims
-//             const validComplainedForNonStudent = [
-//                 'Co-worker', 'Colleague', "Gov't Employee", 
-//                 'Student', 'Stranger', 'Professor', 'Instructor', 'Teacher'
-//             ];
-            
-//             if (validComplainedForNonStudent.includes(complainedClassification)) {
-//                 if (complainedConstituent === 'Yes') {
-//                     // Perpetrator is UP Constituent
-//                     if (relationshipType === 'same-level') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'OASH Code for Employees'];
-//                     } else if (relationshipType === 'authority') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'OASH Code for Employees'];
-//                     } else if (relationshipType === 'intimate') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'RACCS (RA 9710)', 'OASH Code for Employees'];
-//                     } else if (relationshipType === 'none') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Employees'];
-//                     } else if (relationshipType === 'stranger') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'If UP employee: OASH Code for Employees', 'If UP student: OASH Code for Students'];
-//                     } else if (relationshipType === 'classmate' || relationshipType === 'orgmate') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'OASH Code for Students'];
-//                     }
-//                 } else if (complainedConstituent === 'No') {
-//                     // Perpetrator is NOT UP Constituent
-//                     if (relationshipType === 'same-level') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'Contact appropriate government agency'];
-//                     } else if (relationshipType === 'authority') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RACCS (RA 9710)', 'RA 7877 (Anti-Sexual Harassment Act)', 'Contact appropriate government agency'];
-//                     } else if (relationshipType === 'intimate') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'RA 9262 (VAWC) - If victim is a woman/child', 'RACCS (RA 9710)', 'Contact appropriate government agency'];
-//                     } else if (relationshipType === 'none') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'Contact appropriate government agency'];
-//                     } else if (relationshipType === 'stranger') {
-//                         applicableLaws = ['RA 11313 (Safe Spaces Act)', 'File complaint with local authorities (PNP/City Hall)'];
-//                     }
-//                 }
-//             } else {
-//                 applicableLaws = ['Please select a valid complained classification'];
-//             }
-//         }
-        
-//         // Remove duplicates
-//         applicableLaws = [...new Set(applicableLaws)];
-        
-//         return { applicableLaws };
-//     }
-
-//     // Helper function to open law search in new window
-//     function openLawSearch(lawName) {
-//         const searchQuery = encodeURIComponent(lawName);
-//         window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
-//     }
-
-//     function displayApplicableLaws(applicableLaws) {
-//         const lawsContainer = document.getElementById('applicableLawsContainer');
-        
-//         if (!lawsContainer) return;
-        
-//         if (applicableLaws && applicableLaws.length > 0 && applicableLaws[0] !== 'Please select a valid complained classification') {
-//             lawsContainer.innerHTML = `
-//                 <div class="flex items-start gap-3">
-//                     <i class="fas fa-gavel text-up text-xl mt-1"></i>
-//                     <div class="flex-1">
-//                         <h4 class="font-semibold text-up-dark mb-3">Applicable Laws & Policies</h4>
-//                         <div class="space-y-2">
-//                             <ul class="list-disc list-inside text-sm text-gray-700 space-y-1.5">
-//                                 ${applicableLaws.map(law => `<li class="law-badge cursor-pointer text-blue-600 hover:text-blue-800 hover:underline" onclick="LawMapper.openLawSearch('${law.replace(/'/g, "\\'")}')">${law}</li>, `).join('')}
-//                             </ul>
-//                         </div>
-//                         <div class="mt-4 pt-3 border-t border-amber-200 text-xs text-amber-700">
-//                             <i class="fas fa-info-circle mr-1"></i> 
-//                             Note: Laws are mapped based on the provided context. For formal legal advice, please consult the Office of the University Legal Counsel.
-//                         </div>
-//                     </div>
-//                 </div>
-//             `;
-//             lawsContainer.classList.remove('hidden');
-//             lawsContainer.style.display = 'block';
-//         } else if (applicableLaws && applicableLaws[0] === 'Please select a valid complained classification') {
-//             lawsContainer.innerHTML = `
-//                 <div class="flex items-start gap-3">
-//                     <i class="fas fa-exclamation-triangle text-amber-600 text-xl mt-1"></i>
-//                     <div class="flex-1">
-//                         <h4 class="font-semibold text-amber-800 mb-2">⚠️ Incomplete Information</h4>
-//                         <p class="text-sm text-amber-700">Please ensure all fields are filled out correctly for accurate legal mapping.</p>
-//                     </div>
-//                 </div>
-//             `;
-//             lawsContainer.style.display = 'block';
-//         } else {
-//             lawsContainer.innerHTML = `
-//                 <div class="flex items-start gap-3">
-//                     <i class="fas fa-scale-balanced text-gray-400 text-xl mt-1"></i>
-//                     <div class="flex-1">
-//                         <p class="text-sm text-gray-500">No applicable laws mapped. Please complete all fields and try again.</p>
-//                     </div>
-//                 </div>
-//             `;
-//             lawsContainer.style.display = 'block';
-//         }
-//     }
-
-//     // Helper function to get form data
-//     function getFormData() {
-//         const victimClass = document.getElementById('victimClass')?.value || '';
-//         const perpClass = document.getElementById('perpClass')?.value || '';
-        
-//         // Get radio button values
-//         const victimUP = document.querySelector('input[name="victimUP"]:checked')?.value || '';
-//         const perpUP = document.querySelector('input[name="perpUP"]:checked')?.value || '';
-        
-//         const relationship = document.getElementById('relationship')?.value || '';
-        
-//         return {
-//             victimClassification: victimClass,
-//             complainedClassification: perpClass,
-//             victimConstituent: victimUP,
-//             complainedConstituent: perpUP,
-//             relationshipType: relationship
-//         };
-//     }
-
-//     // Main function to analyze and display laws
-//     function analyzeAndDisplayLaws() {
-//         const formData = getFormData();
-        
-//         // Check if all required fields are filled
-//         if (!formData.victimClassification || !formData.complainedClassification || 
-//             !formData.victimConstituent || !formData.complainedConstituent || 
-//             !formData.relationshipType) {
-//             displayApplicableLaws(['Please complete all legal context fields']);
-//             return;
-//         }
-        
-//         const result = determineApplicableLaws(formData);
-//         displayApplicableLaws(result.applicableLaws);
-        
-//         return result;
-//     }
-
-//     // Export public methods
-//     window.LawMapper = {
-//         determineApplicableLaws: determineApplicableLaws,
-//         displayApplicableLaws: displayApplicableLaws,
-//         getFormData: getFormData,
-//         analyzeAndDisplayLaws: analyzeAndDisplayLaws,
-//         openLawSearch: openLawSearch  // Added this so it can be called from onclick
-//     };
-// })();

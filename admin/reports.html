@@ -14,8 +14,87 @@
     <link rel="stylesheet" href="css/report.css">
     <link rel="stylesheet" href="../animation/physics-toast.min.css">
     <script src="../animation/physics-toast.min.js"></script>
+    <!-- jsPDF libraries for PDF download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Modal styles - ensures content scrolls and footer stays fixed */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            flex-shrink: 0;
+            background: white;
+        }
+        .modal-footer button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-close {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .btn-close:hover {
+            background-color: #e5e7eb;
+        }
+        .btn-pdf {
+            background-color: #6F1A1F;
+            color: white;
+        }
+        .btn-pdf:hover {
+            background-color: #8E3A3F;
+        }
+        /* Hide modal initially */
+        .hidden {
+            display: none;
+        }
+        /* Keep existing styles */
+        .sidebar-link, .mobile-nav-item, .filter-container, .reports-table, .pagination-container, .status-badge {
+            /* existing styles from your CSS */
+        }
+    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -75,7 +154,7 @@
         <div class="max-w-7xl mx-auto p-4 md:p-8 pb-28 md:pb-8">
             <div class="mb-6">
                 <h1 class="text-2xl md:text-3xl font-semibold text-[#2A2424]">Reports management</h1>
-                <p class="text-[#655A5A] text-sm mt-1">View, filter, and update report statuses and offense levels</p>
+                <p class="text-[#655A5A] text-sm mt-1">View, filter, and update report statuses and Harassment types</p>
             </div>
 
             <div class="filter-container">
@@ -91,7 +170,7 @@
                         <option value="resolved">Resolved</option>
                     </select>
                     <select id="offenseFilter" class="filter-select">
-                        <option value="all">All offense levels</option>
+                        <option value="all">All Harassment types</option>
                         <option value="Physical Harassment">Physical Harassment</option>
                         <option value="Verbal Harassment">Verbal Harassment</option>
                         <option value="Non-Verbal Harassment">Non-Verbal Harassment</option>
@@ -103,8 +182,8 @@
 
             <div class="hidden md:block table-container">
                 <table class="reports-table">
-                    <thead><tr><th>Date</th><th>Complainant</th><th>Respondent</th><th>Offense level</th><th>Procedure</th><th>Status</th><th>Actions</th></thead>
-                    <tbody id="desktop-table-body"><td colspan="8" class="text-center py-8"><div class="loading-spinner mx-auto"></div> Loading...</td></tr>
+                    <thead><tr><th>Date</th><th>Complainant</th><th>Perpretator</th><th>Harassment Type</th><th>Procedure</th><th>Status</th><th>Actions</th></thead>
+                    <tbody id="desktop-table-body"><td colspan="8" class="text-center py-8"><div class="loading-spinner mx-auto"></div> Loading...</td></tbody>
                 </table>
                 <div class="pagination-container" id="desktop-pagination">
                     <div class="pagination-info" id="desktop-pagination-info"></div>
@@ -120,23 +199,30 @@
         </div>
     </main>
 
-    <!-- View Details Modal -->
+    <!-- Modal with fixed footer and scrollable body -->
     <div id="viewModal" class="modal-overlay hidden">
         <div class="modal-container">
             <div class="modal-header">
                 <h3 class="text-lg font-semibold text-[#2A2424]"><i class="fas fa-flag mr-2 text-up"></i>Report Details</h3>
                 <button id="closeModalBtn" class="text-gray-400 hover:text-[#6F1A1F]"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content will be injected here -->
+            </div>
             <div class="modal-footer">
-                <button id="modalCloseBtn" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition">Close</button>
+                <button type="button" class="btn-pdf px-6 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2" onclick="downloadPDF()">
+                        <i class="fas fa-download text-sm"></i>
+                        Download as PDF
+                    </button>
+                <button id="modalCloseBtn" class="btn-close">Close</button>
             </div>
         </div>
     </div>
 
     <script src="js/me.js"></script>
-    <script src="js/report.js"></script>
     <script src="../js/policy.js"></script>
-    <script src="../js/law-mapper.js"></script>
+    <script src="js/law-mapper.js"></script>
+    <script src="js/report.js"></script>
+    
 </body>
 </html>
