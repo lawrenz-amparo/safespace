@@ -2,26 +2,26 @@
 (function() {
     'use strict';
 
-    // Static relationship options (same for all complainants)
+    // Static relationship options – display text capitalized
     const RELATIONSHIP_OPTIONS = [
-        { value: "student", text: "student" },
-        { value: "professor", text: "professor" },
-        { value: "colleague", text: "colleague" },
-        { value: "classmate", text: "classmate" },
-        { value: "orgmate", text: "orgmate" },
-        { value: "friend", text: "friend" },
-        { value: "outsider/stranger", text: "outsider/stranger" },
-        { value: "with moral ascendancy", text: "with moral ascendancy" },
-        { value: "with intimate", text: "with intimate" }
+        { value: "student", text: "Student" },
+        { value: "professor", text: "Professor" },
+        { value: "colleague", text: "Colleague" },
+        { value: "classmate", text: "Classmate" },
+        { value: "orgmate", text: "Orgmate" },
+        { value: "friend", text: "Friend" },
+        { value: "outsider/stranger", text: "Outsider/Stranger" },
+        { value: "with moral ascendancy", text: "With Moral Ascendancy" },
+        { value: "with intimate", text: "With Intimate" }
     ];
 
-    // Static respondent classification options (same for all complainants)
-    const RESPONDENT_OPTIONS = [
+    // Static classification options (for both complainant and respondent) – display text capitalized
+    const CLASSIFICATION_OPTIONS = [
         { value: "Student", text: "Student" },
-        { value: "instructor/professor", text: "instructor/professor" },
-        { value: "non-teaching personnel (admin & reps)", text: "non-teaching personnel (admin & reps)" },
+        { value: "instructor/professor", text: "Instructor/Professor" },
+        { value: "non-teaching personnel (admin & reps)", text: "Non-Teaching Personnel (Admin & Reps)" },
         { value: "Alumni", text: "Alumni" },
-        { value: "non-UP/outsider", text: "non-UP/outsider" }
+        { value: "non-UP/outsider", text: "Non-UP/Outsider" }
     ];
 
     // Cache DOM elements
@@ -29,9 +29,26 @@
     let relationshipSelect = null;
     let perpSelect = null;        // respondent classification
 
-    /**
-     * Populate relationship dropdown with static options
-     */
+    // Populate complainant classification dropdown
+    function updateComplainantOptions() {
+        if (!victimSelect) return;
+        victimSelect.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = "";
+        placeholder.textContent = "— Select category —";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        victimSelect.appendChild(placeholder);
+        
+        CLASSIFICATION_OPTIONS.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.text;
+            victimSelect.appendChild(option);
+        });
+    }
+
+    // Populate relationship dropdown
     function updateRelationshipOptions() {
         if (!relationshipSelect) return;
         relationshipSelect.innerHTML = '';
@@ -55,9 +72,7 @@
         document.dispatchEvent(event);
     }
 
-    /**
-     * Populate respondent classification dropdown with static options
-     */
+    // Populate respondent classification dropdown
     function updateRespondentOptions() {
         if (!perpSelect) return;
         perpSelect.innerHTML = '';
@@ -68,7 +83,7 @@
         placeholder.selected = true;
         perpSelect.appendChild(placeholder);
         
-        RESPONDENT_OPTIONS.forEach(opt => {
+        CLASSIFICATION_OPTIONS.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
             option.textContent = opt.text;
@@ -76,9 +91,20 @@
         });
         
         const event = new CustomEvent('respondentOptionsUpdated', { 
-            detail: { optionsCount: RESPONDENT_OPTIONS.length }
+            detail: { optionsCount: CLASSIFICATION_OPTIONS.length }
         });
         document.dispatchEvent(event);
+    }
+
+    function resetComplainantDropdown() {
+        if (!victimSelect) return;
+        victimSelect.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = "";
+        placeholder.textContent = "— Select category —";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        victimSelect.appendChild(placeholder);
     }
 
     function resetRelationshipDropdown() {
@@ -125,20 +151,21 @@
             return;
         }
         
-        // Initialize dropdowns with static options
+        // Initialize all dropdowns with capitalized options
+        resetComplainantDropdown();
+        updateComplainantOptions();
         resetRelationshipDropdown();
         updateRelationshipOptions();
         resetRespondentDropdown();
         updateRespondentOptions();
         
-        // No need to listen for victimSelect changes because options are static,
-        // but we keep a change listener to notify other components if needed.
+        // Listen for changes on complainant classification (if needed)
         victimSelect.addEventListener('change', function() {
             const event = new CustomEvent('victimClassChanged', { detail: { value: victimSelect.value } });
             document.dispatchEvent(event);
         });
         
-        console.log('Relationship Manager initialized with static options');
+        console.log('Relationship Manager initialized with capitalized options');
     }
 
     window.RelationshipManager = {
@@ -147,12 +174,15 @@
         getCurrentVictimClass: getCurrentVictimClass,
         getCurrentComplainedClass: getCurrentComplainedClass,
         resetDropdowns: function() {
+            resetComplainantDropdown();
+            updateComplainantOptions();
             resetRelationshipDropdown();
             updateRelationshipOptions();
             resetRespondentDropdown();
             updateRespondentOptions();
         },
         updateOptions: function() {
+            updateComplainantOptions();
             updateRelationshipOptions();
             updateRespondentOptions();
         }

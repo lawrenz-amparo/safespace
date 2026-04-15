@@ -123,35 +123,35 @@
 
         if (isStudentVictim) {
             if (isStudentPerp || ['Stranger', 'Co-worker', 'Colleague'].includes(complainedClassification) || relationshipType === 'classmate' || relationshipType === 'orgmate') {
-                applicableLaws.push('OASH Code for Students');
+                applicableLaws.push('ASH Code for Students');
             }
             if (isAuthority && !isStudentPerp) {
                 applicableLaws.push('RA 7877 (Anti-Sexual Harassment Act)');
                 applicableLaws.push('RACCS (RA 9710)');
-                applicableLaws.push('OASH Code for Employees');
+                applicableLaws.push('ASH Code for Employees');
             }
             if (isIntimate) {
                 applicableLaws.push('RA 9262 (VAWC) - If victim is a woman/child');
-                if (isStudentPerp) applicableLaws.push('OASH Code for Students');
-                else if (isEmployeePerp) applicableLaws.push('OASH Code for Employees');
+                if (isStudentPerp) applicableLaws.push('ASH Code for Students');
+                else if (isEmployeePerp) applicableLaws.push('ASH Code for Employees');
             }
         } else {
             if (isEmployeePerp || isSameLevel) {
                 applicableLaws.push('RA 7877 (Anti-Sexual Harassment Act)');
                 applicableLaws.push('RACCS (RA 9710)');
-                applicableLaws.push('OASH Code for Employees');
+                applicableLaws.push('ASH Code for Employees');
             }
             if (isAuthority && isEmployeePerp) {
                 applicableLaws.push('RA 7877 (Anti-Sexual Harassment Act)');
                 applicableLaws.push('RACCS (RA 9710)');
-                applicableLaws.push('OASH Code for Employees');
+                applicableLaws.push('ASH Code for Employees');
             }
             if (isIntimate) {
                 applicableLaws.push('RA 9262 (VAWC) - If victim is a woman/child');
-                if (isStudentPerp) applicableLaws.push('OASH Code for Students');
-                else if (isEmployeePerp) applicableLaws.push('OASH Code for Employees');
+                if (isStudentPerp) applicableLaws.push('ASH Code for Students');
+                else if (isEmployeePerp) applicableLaws.push('ASH Code for Employees');
             }
-            if (isStudentPerp && !isIntimate) applicableLaws.push('OASH Code for Students');
+            if (isStudentPerp && !isIntimate) applicableLaws.push('ASH Code for Students');
         }
 
         applicableLaws = [...new Set(applicableLaws)];
@@ -175,13 +175,13 @@
 
         lawNames.forEach(lawName => {
             let policyArray = null;
-            if (lawName.includes('OASH Code for Students')) {
+            if (lawName.includes('ASH Code for Students')) {
                 policyArray = antiSexualHarassmentCode;
                 if (policyArray) {
                     const studentPolicies = policyArray.filter(p => p.applicable_to && p.applicable_to.includes('students'));
                     allPolicies.push(...studentPolicies.map(p => ({ ...p, law_display_name: lawName })));
                 }
-            } else if (lawName.includes('OASH Code for Employees')) {
+            } else if (lawName.includes('ASH Code for Employees')) {
                 policyArray = antiSexualHarassmentCode;
                 if (policyArray) {
                     const employeePolicies = policyArray.filter(p => p.applicable_to && p.applicable_to.includes('employees'));
@@ -435,7 +435,7 @@
         if (lawName.includes('RA 7877')) return 'fas fa-briefcase';
         if (lawName.includes('RA 9262') || lawName.includes('VAWC')) return 'fas fa-heart';
         if (lawName.includes('RACCS')) return 'fas fa-building';
-        if (lawName.includes('OASH Code')) return 'fas fa-gavel';
+        if (lawName.includes('ASH Code')) return 'fas fa-gavel';
         return 'fas fa-book';
     }
 
@@ -584,6 +584,6 @@
         getFormData,
         analyzeAndDisplayLaws,
         exportPolicies,
-        mapLawsFromReport   // <-- new method for view button
+        mapLawsFromReport
     };
 })();

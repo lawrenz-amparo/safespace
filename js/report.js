@@ -30,9 +30,9 @@
         return (value * 100).toFixed(2);
     }
 
-    // Get severity description
-    function getSeverityDescription(severityLabel) {
-        switch(severityLabel) {
+    // Get classification description (renamed from severity)
+    function getClassificationDescription(classificationLabel) {
+        switch(classificationLabel) {
             case 'Grave':
                 return 'This incident involves serious acts that may cause significant harm and may require immediate intervention and escalation.';
             case 'Less Grave':
@@ -40,69 +40,53 @@
             case 'Light':
                 return 'This incident involves minor acts that can typically be resolved through counseling and preventive measures.';
             default:
-                return 'Severity level determined by AI analysis.';
+                return 'Classification level determined by AI analysis.';
         }
     }
 
-    // Add severity badge to the result panel
-    function addSeverityBadge(severityLabel, severityConfidence) {
-        const existingBadge = document.getElementById('severityBadge');
-        if (existingBadge) {
-            existingBadge.remove();
-        }
+    // Add classification badge to the result panel (renamed from addSeverityBadge)
+    function addClassificationBadge(classificationLabel, classificationConfidence) {
+        // Use the new container ID from HTML
+        const badgeContainer = document.getElementById('classificationLevelContainer');
+        if (!badgeContainer) return;
         
-        const badgeContainer = document.createElement('div');
-        badgeContainer.id = 'severityBadge';
-        badgeContainer.className = 'mt-3 pt-2 border-t border-[#E7DCDC]';
+        // Clear existing content
+        badgeContainer.innerHTML = '';
         
-        let severityColor = '';
-        let severityIcon = '';
+        let classificationColor = '';
+        let classificationIcon = '';
         
-        switch(severityLabel) {
+        switch(classificationLabel) {
             case 'Grave':
-                severityColor = 'bg-red-100 text-red-800 border-red-200';
-                severityIcon = 'fa-exclamation-triangle';
+                classificationColor = 'bg-red-100 text-red-800 border-red-200';
+                classificationIcon = 'fa-exclamation-triangle';
                 break;
             case 'Less Grave':
-                severityColor = 'bg-orange-100 text-orange-800 border-orange-200';
-                severityIcon = 'fa-chart-line';
+                classificationColor = 'bg-orange-100 text-orange-800 border-orange-200';
+                classificationIcon = 'fa-chart-line';
                 break;
             case 'Light':
-                severityColor = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-                severityIcon = 'fa-thermometer-half';
+                classificationColor = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                classificationIcon = 'fa-thermometer-half';
                 break;
             default:
-                severityColor = 'bg-gray-100 text-gray-800 border-gray-200';
-                severityIcon = 'fa-info-circle';
+                classificationColor = 'bg-gray-100 text-gray-800 border-gray-200';
+                classificationIcon = 'fa-info-circle';
         }
         
         badgeContainer.innerHTML = `
             <div class="flex items-center justify-between">
                 <span class="text-xs text-[#6F5E5E] uppercase tracking-wider">
-                    <i class="fas ${severityIcon} mr-1"></i> Severity Assessment
+                    <i class="fas ${classificationIcon} mr-1"></i> Classification of Acts Assessment
                 </span>
-                <span class="px-2 py-1 rounded-full text-xs font-medium ${severityColor}">
-                    ${severityLabel} (${formatPercent(severityConfidence)}% confidence)
+                <span class="px-2 py-1 rounded-full text-xs font-medium ${classificationColor}">
+                    ${classificationLabel} (${formatPercent(classificationConfidence)}% confidence)
                 </span>
             </div>
             <p class="text-xs text-[#6F5E5E] mt-2">
-                ${getSeverityDescription(severityLabel)}
+                ${getClassificationDescription(classificationLabel)}
             </p>
         `;
-        
-        // Insert after the probability section
-        const probSection = document.querySelector('.space-y-3.text-xs');
-        if (probSection && probSection.parentElement) {
-            const probContainer = probSection.parentElement;
-            if (probContainer) {
-                probContainer.parentNode.insertBefore(badgeContainer, probContainer.nextSibling);
-            }
-        } else {
-            const resultPanelContent = document.querySelector('#resultPanel .bg-\\[\\#F9F4F4\\]');
-            if (resultPanelContent) {
-                resultPanelContent.appendChild(badgeContainer);
-            }
-        }
     }
 
     // Update UI with classification results
@@ -122,7 +106,7 @@
         const confidenceText = document.getElementById('confidenceText');
         
         harassmentTypeResult.innerHTML = `${offenseLabel}`;
-        confidenceText.innerHTML = `Confidence: ${formatPercent(offenseConfidence)}% | Severity: ${severityLabel} (${formatPercent(severityConfidence)}%)`;
+        confidenceText.innerHTML = `Confidence: ${formatPercent(offenseConfidence)}% | Classification: ${severityLabel} (${formatPercent(severityConfidence)}%)`;
         
         // Update probability values
         document.getElementById('probPhyVal').innerHTML = formatProb(offenseProbs["Physical Harassment"] || 0);
@@ -144,8 +128,8 @@
         const shortDesc = descriptionText.length > 280 ? descriptionText.substring(0, 277) + '...' : descriptionText;
         document.getElementById('resultDescription').innerHTML = `“${escapeHtml(shortDesc)}”`;
         
-        // Add severity badge
-        addSeverityBadge(severityLabel, severityConfidence);
+        // Add classification badge (renamed)
+        addClassificationBadge(severityLabel, severityConfidence);
         
         // Store AI result for later use
         currentAiResult = {
@@ -373,10 +357,10 @@
         if (relationshipSelect) relationshipSelect.value = '';
         if (locationSelect) locationSelect.value = '';
         
-        // Remove severity badge if exists
-        const severityBadge = document.getElementById('severityBadge');
-        if (severityBadge) {
-            severityBadge.remove();
+        // Clear classification badge container (new ID)
+        const classificationContainer = document.getElementById('classificationLevelContainer');
+        if (classificationContainer) {
+            classificationContainer.innerHTML = '';
         }
         
         // Clear laws container

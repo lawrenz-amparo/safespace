@@ -15,8 +15,7 @@ async function loadUserProfile() {
     // Use cached data if it's less than 5 minutes old (300000 ms)
     if (cachedUser && cachedTimestamp && (now - parseInt(cachedTimestamp)) < 300000) {
         const userData = JSON.parse(cachedUser);
-        document.getElementById('sidebarFullName').textContent = userData.fullName;
-        document.getElementById('sidebarEmail').textContent = userData.email;
+        updateUI(userData);
         return;
     }
 
@@ -35,13 +34,24 @@ async function loadUserProfile() {
             // Store user data in localStorage with timestamp
             localStorage.setItem('userData', JSON.stringify(data.data));
             localStorage.setItem('userDataTimestamp', Date.now().toString());
-            
-            document.getElementById('sidebarFullName').textContent = data.data.fullName;
-            document.getElementById('sidebarEmail').textContent = data.data.email;
+            updateUI(data.data);
         }
     } catch (error) {
         console.error('Error loading profile:', error);
     }
+}
+
+function updateUI(userData) {
+    // Update sidebar (existing functionality)
+    const sidebarFullName = document.getElementById('sidebarFullName');
+    const sidebarEmail = document.getElementById('sidebarEmail');
+    if (sidebarFullName) sidebarFullName.textContent = userData.fullName;
+    if (sidebarEmail) sidebarEmail.textContent = userData.email;
+
+    // NEW: Update welcome heading (if the span exists)
+    const firstName = userData.fullName?.split(' ')[0] || 'User';
+    const userFirstNameSpan = document.getElementById('userFirstName');
+    if (userFirstNameSpan) userFirstNameSpan.textContent = firstName;
 }
 
 // Clear cache on logout
