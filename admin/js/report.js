@@ -21,6 +21,111 @@ function checkAuth() {
     return true;
 }
 
+// ---------- ASH Code Penalty Helper ----------
+function getASHPenalty(report) {
+    const classification = report.complainedClassification || '';
+    const severity = report.predictedSeverity || 'Light';
+    const offenseLevel = report.offenseLevel || 'First offense';
+    
+    const isStudent = classification === 'Student';
+    const isPersonnel = ['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(classification);
+    
+    if (!isStudent && !isPersonnel) {
+        return report.recommendedSanction || 'N/A';
+    }
+    
+    let offenseNumber = 1;
+    if (offenseLevel.includes('Second')) offenseNumber = 2;
+    else if (offenseLevel.includes('Third')) offenseNumber = 3;
+    else if (offenseLevel.includes('Multiple')) offenseNumber = 3;
+    
+    if (isStudent) {
+        if (severity === 'Light') {
+            if (offenseNumber === 1) return 'Reprimand or community service not exceeding 30 hours';
+            if (offenseNumber === 2) return 'Suspension for not exceeding one (1) semester';
+            return 'Expulsion';
+        }
+        if (severity === 'Less Grave') {
+            if (offenseNumber === 1) return 'Community service of 60 hours';
+            if (offenseNumber === 2) return 'Suspension for one (1) year';
+            return 'Expulsion';
+        }
+        if (severity === 'Grave') {
+            return 'Suspension for one (1) academic year to expulsion';
+        }
+    }
+    
+    if (isPersonnel) {
+        if (severity === 'Light') {
+            if (offenseNumber === 1) return 'Reprimand or suspension for one (1) month and one (1) day to six (6) months';
+            if (offenseNumber === 2) return 'Fine or suspension for six (6) months and one (1) day to one (1) year';
+            return 'Dismissal';
+        }
+        if (severity === 'Less Grave') {
+            if (offenseNumber === 1) return 'Suspension for six (6) months and one (1) day to one (1) year';
+            return 'Dismissal';
+        }
+        if (severity === 'Grave') {
+            return 'Dismissal';
+        }
+    }
+    
+    return report.recommendedSanction || 'N/A';
+}
+
+// ---------- Law Name Display Helper ----------
+function getLawNamesForDisplay(report) {
+    // Use stored value if valid
+    if (report.applicableLaws && report.applicableLaws !== 'N/A' && report.applicableLaws.trim() !== '') {
+        return report.applicableLaws;
+    }
+    
+    if (typeof LawMapper !== 'undefined' && LawMapper.determineApplicableLaws) {
+        // Build context with fallback defaults for missing fields
+        const context = {
+            classification: report.classification || 'Student', // default to Student
+            victimConstituent: report.victimConstituent || 'No',
+            complainedClassification: report.complainedClassification || 'non-UP/outsider', // default to outsider
+            complainedConstituent: report.complainedConstituent || 'No',
+            relationshipType: report.relationshipType || deriveRelationshipTypeFromReport(report) || 'outsider/stranger',
+            incidentLocation: report.incidentLocation || mapIncidentLocationFromReport(report) || 'inside_campus'
+        };
+        
+        console.log('getLawNamesForDisplay context:', context);
+        
+        try {
+            const result = LawMapper.determineApplicableLaws(context, null);
+            console.log('LawMapper result:', result);
+            const laws = result.applicableLaws || [];
+            const cleanLaws = laws.filter(law => !law.includes('Contact details'));
+            return cleanLaws.length ? cleanLaws.join(', ') : 'RA 11313';
+        } catch (e) {
+            console.error('Error computing laws:', e);
+        }
+    }
+    return 'RA 11313';
+}
+
+function deriveRelationshipTypeFromReport(report) {
+    const victimClass = report.classification;
+    const perpClass = report.complainedClassification;
+    if (!victimClass || !perpClass) return 'outsider/stranger'; // fallback
+    if (victimClass === 'Student' && perpClass === 'Student') return 'student';
+    if (victimClass === 'Student' && ['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(perpClass)) return 'professor';
+    if (['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(victimClass) && perpClass === 'Student') return 'student';
+    if (['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(victimClass) && ['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(perpClass)) return 'colleague';
+    return 'outsider/stranger';
+}
+
+function mapIncidentLocationFromReport(report) {
+    if (report.incidentLocation) return report.incidentLocation;
+    const inside = report.complainedInsideCampus;
+    if (inside === 'Inside the campus') return 'inside_campus';
+    if (inside === 'Outside the campus, but UPLB activity') return 'outside_uplb_activity';
+    if (inside === 'Outside the campus and not UPLB activity') return 'outside_not_uplb';
+    return '';
+}
+
 // Offense levels list
 const offenseLevels = ['Physical Harassment', 'Verbal Harassment', 'Non-Verbal Harassment', 'Cyber Sexual Harassment', 'Not Harassment'];
 
@@ -581,18 +686,10 @@ window.downloadPDF = async function() {
             <div class="form-col form-group"><label>Time of incident:</label><div class="info-value">${d.incidentTime || ''}</div></div>
         </div>
         
-        <div class="section-title">D. Options to proceed with the complaint:</div>
-        <div class="form-group"><label>Proceed with complaint:</label><div class="info-value">${d.proceedWithComplaint === 'yes' ? 'Yes' : (d.proceedWithComplaint === 'no' ? 'No' : '')}</div></div>
-        
-        ${d.procedureType && d.procedureType !== 'Undecided' ? `
-        <div class="form-group"><label>Selected Procedure:</label><div class="info-value">${d.procedureType === 'formal' ? 'Formal procedure' : (d.procedureType === 'informal' ? 'Informal procedure' : d.procedureType)}</div></div>
-        ` : ''}
+        <div class="section-title">D. Decision to Proceed with the Complaint:</div>
+        <div class="form-group"><div class="info-value-multiline">${escapeHtml(d.procedureType)}</div></div>
 
-        <div class="section-title">E. WHERE DID YOU HEAR ABOUT OASH?</div>
-        <div class="form-group"><div class="info-value">${d.whereDidYouHearAboutUs && d.whereDidYouHearAboutUs !== 'N/A' ? d.whereDidYouHearAboutUs : ''}</div></div>
-        ${d.otherWhereDidYouHearAboutUs ? `<div class="form-group"><label>Other Source:</label><div class="info-value">${escapeHtml(d.otherWhereDidYouHearAboutUs)}</div></div>` : ''}
-
-        <div class="section-title">F. RECORDED INFORMATION</div>
+        <div class="section-title">E. RECORDED INFORMATION</div>
         
         <div class="form-row">
             <div class="form-col form-group"><label>Recorded by:</label><div class="info-value">${d.recordedBy || ''}</div></div>
@@ -629,6 +726,7 @@ window.downloadPDF = async function() {
     }
 };
 
+// Updated viewReportDetails with ASH penalties and law names, no full policy UI
 window.viewReportDetails = function(reportId) {
     currentViewingReportId = reportId;
     const report = allReports.find(r => (r.reportId === reportId) || (r.id === reportId));
@@ -641,276 +739,63 @@ window.viewReportDetails = function(reportId) {
     const modalBody = document.getElementById('modalBody');
     modalBody.innerHTML = `
         <div class="max-h-[75vh] p-5">
-            <!-- Status and ID Row -->
             <div class="flex flex-wrap justify-between items-center gap-3 pb-4 mb-4 border-b border-gray-200">
                 <span class="text-xs text-gray-500 font-mono">ID: ${report.reportId || report.id || 'N/A'}</span>
                 <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(report.status)}">${(report.status || 'pending').toUpperCase()}</span>
             </div>
             
-            <!-- All Fields in Simple Grid -->
             <div class="grid grid-cols-1 md:grid-cols-1 gap-x-6 gap-y-3">
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Full Name</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.firstName || '')} ${escapeHtml(d.middleName || '')} ${escapeHtml(d.lastName || '')}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Age</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.age || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Biological Sex</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.biologicalSex || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Identified As</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.identifiedAs || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Civil Status</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.civilStatus || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Mobile Number</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.mobileNumber || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Landline Number</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.landLineNumber || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Present Address</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.presentAddress || 'N/A')}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Permanent Address</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.permanentAddress || 'N/A')}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Classification</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.classification || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">College</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.college || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Department/Unit</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.department || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Full Name</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedFullName || 'N/A')}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Sex</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.complainedSex || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Classification</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.complainedClassification || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator College</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.complainedCollege || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Department</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.complainedDepartment || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Victim is UP Constituent?</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.victimConstituent || 'N/A')}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator is UP Constituent?</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedConstituent || 'N/A')}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Inside Campus Premises?</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedInsideCampus || 'N/A')}</div>
-                </div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Full Name</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.firstName || '')} ${escapeHtml(d.middleName || '')} ${escapeHtml(d.lastName || '')}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Age</div><div class="w-3/5 text-sm text-gray-800">${d.age || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Biological Sex</div><div class="w-3/5 text-sm text-gray-800">${d.biologicalSex || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Identified As</div><div class="w-3/5 text-sm text-gray-800">${d.identifiedAs || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Civil Status</div><div class="w-3/5 text-sm text-gray-800">${d.civilStatus || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Mobile Number</div><div class="w-3/5 text-sm text-gray-800">${d.mobileNumber || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Landline Number</div><div class="w-3/5 text-sm text-gray-800">${d.landLineNumber || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Present Address</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.presentAddress || 'N/A')}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Permanent Address</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.permanentAddress || 'N/A')}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Classification</div><div class="w-3/5 text-sm text-gray-800">${d.classification || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">College</div><div class="w-3/5 text-sm text-gray-800">${d.college || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Department/Unit</div><div class="w-3/5 text-sm text-gray-800">${d.department || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Full Name</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedFullName || 'N/A')}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Sex</div><div class="w-3/5 text-sm text-gray-800">${d.complainedSex || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Classification</div><div class="w-3/5 text-sm text-gray-800">${d.complainedClassification || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator College</div><div class="w-3/5 text-sm text-gray-800">${d.complainedCollege || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator Department</div><div class="w-3/5 text-sm text-gray-800">${d.complainedDepartment || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Victim is UP Constituent?</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.victimConstituent || 'N/A')}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Perpetrator is UP Constituent?</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedConstituent || 'N/A')}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Inside Campus Premises?</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedInsideCampus || 'N/A')}</div></div>
                 ${d.complainedInsideCampus === "Inside the campus" ? `
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Incident Exact Location?</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedExactLocation || 'N/A')}</div>
-                </div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Incident Exact Location?</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.complainedExactLocation || 'N/A')}</div></div>
                 ` : ''}
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Procedure Type</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.procedureType || 'Undecided'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Where did you hear about us?</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.whereDidYouHearAboutUs || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Other Source</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.otherWhereDidYouHearAboutUs || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Applicable Laws</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.applicableLaws || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Remarks</div>
-                    <div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.remarks || 'N/A')}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Harassment Type</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.predictedOffense || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Severity</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.predictedSeverity || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Offense Level</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.offenseLevel || report.offenseLevel || 'Not set'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Applicable Penalties</div>
-                    <div class="w-3/5 text-sm text-gray-800 penalty-value">${d.recommendedSanction || 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Created</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.createdAt ? new Date(d.createdAt).toLocaleString() : 'N/A'}</div>
-                </div>
-                <div class="flex py-2 border-b border-gray-100">
-                    <div class="w-2/5 text-xs text-gray-500 font-medium">Last Updated</div>
-                    <div class="w-3/5 text-sm text-gray-800">${d.updatedAt ? new Date(d.updatedAt).toLocaleString() : 'N/A'}</div>
-                </div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Procedure Type</div><div class="w-3/5 text-sm text-gray-800">${d.procedureType || 'Undecided'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Harassment Type</div><div class="w-3/5 text-sm text-gray-800">${d.predictedOffense || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Severity</div><div class="w-3/5 text-sm text-gray-800">${d.predictedSeverity || 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Applicable Laws</div><div class="w-3/5 text-sm text-gray-800">${getLawNamesForDisplay(d)}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Offense Level</div><div class="w-3/5 text-sm text-gray-800">${d.offenseLevel || report.offenseLevel || 'Not set'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Applicable Penalties</div><div class="w-3/5 text-sm text-gray-800">${getASHPenalty(d)}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Remarks</div><div class="w-3/5 text-sm text-gray-800">${escapeHtml(d.remarks || 'N/A')}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Created</div><div class="w-3/5 text-sm text-gray-800">${d.createdAt ? new Date(d.createdAt).toLocaleString() : 'N/A'}</div></div>
+                <div class="flex py-2 border-b border-gray-100"><div class="w-2/5 text-xs text-gray-500 font-medium">Last Updated</div><div class="w-3/5 text-sm text-gray-800">${d.updatedAt ? new Date(d.updatedAt).toLocaleString() : 'N/A'}</div></div>
             </div>
             
-            <!-- Long Text Fields (Full Width) -->
             <div class="mt-6 space-y-4">
-                <div>
-                    <div class="text-xs text-gray-500 font-medium mb-2">Incident Details</div>
-                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(d.complainantStory || 'N/A')}</div>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-500 font-medium mb-2">Incident Event</div>
-                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(d.complainedIncidentHappened || 'N/A')}</div>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-500 font-medium mb-2">Physical Appearance</div>
-                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(d.complainedPhysicalAppearance || 'N/A')}</div>
-                </div>
+                <div><div class="text-xs text-gray-500 font-medium mb-2">Incident Details</div><div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(d.complainantStory || 'N/A')}</div></div>
+                <div><div class="text-xs text-gray-500 font-medium mb-2">Incident Event</div><div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(d.complainedIncidentHappened || 'N/A')}</div></div>
             </div>
             
-            <!-- Laws Container -->
             <div class="mt-6" id="applicableLawsContainer"></div>
         </div>
     `;
 
-    // Display applicable laws using LawMapper
-    if (typeof LawMapper !== 'undefined') {
-        // Map incident location if needed (if d has complainedInsideCampus)
-        if (!d.incidentLocation && d.complainedInsideCampus) {
-            if (d.complainedInsideCampus === "Inside the campus") {
-                d.incidentLocation = 'inside_campus';
-            } else if (d.complainedInsideCampus === "Outside the campus") {
-                d.incidentLocation = 'outside_not_uplb';
-            } else {
-                d.incidentLocation = '';
-            }
-        }
-        
-        // Create AI result object if available
-        const aiResult = d.predictedOffense && d.predictedSeverity ? {
-            category: d.predictedOffense || '',
-            severity: d.predictedSeverity || '',
-            confidence: d.aiConfidence || 0
-        } : null;
-        
-        // Create the report object with all required fields
-        const reportForMapping = {
-            classification: d.classification || '',
-            complainedClassification: d.complainedClassification || '',
-            victimConstituent: d.victimConstituent || 'No',
-            complainedConstituent: d.complainedConstituent || 'No',
-            relationshipType: d.relationshipType || 'none',
-            incidentLocation: d.incidentLocation || '',
-            // Include optional AI fields if available
-            predictedOffense: d.predictedOffense,
-            predictedSeverity: d.predictedSeverity
-        };
-        
-        // Use mapLawsFromReport which handles missing fields properly
-        LawMapper.mapLawsFromReport(reportForMapping, aiResult);
-        const mapRes = LawMapper.mapLawsFromReport(d, aiResult);
-
-        if (mapRes) {
-            const penaltyElement = document.querySelector('#modalBody .penalty-value');
-            if (penaltyElement) {
-                const allPunishments = mapRes.punishments
-                    ?.map((p, index) => {
-                        // Only include if punishment exists and is not empty string
-                        if (p.punishment && p.punishment.trim() !== '') {
-                            return `${index + 1}. ${p.punishment}`;
-                        }
-                        return null;
-                    })
-                    .filter(p => p !== null) // Remove null entries
-                    .join('\n');
-                
-                if (allPunishments && allPunishments.length > 0) {
-                    penaltyElement.innerHTML = allPunishments.replace(/\n/g, '<br>');
-                } else {
-                    penaltyElement.textContent = 'No specific penalty information available';
-                }
-            }
-        }
-    } else {
-        const lawsContainer = document.getElementById('applicableLawsContainer');
-        if (lawsContainer) {
-            lawsContainer.innerHTML = `
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-700">Need legal guidance? Contact OASH: (049) 501-1844 | oash.uplb@up.edu.ph</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    }
-    
-    // Display applicable laws using LawMapper
-    // if (typeof LawMapper !== 'undefined') {
-    //     const lawMapperData = {
-    //         victimClassification: d.classification || '',
-    //         complainedClassification: d.complainedClassification || '',
-    //         victimConstituent: d.victimConstituent || 'No',
-    //         complainedConstituent: d.complainedConstituent || 'No',
-    //         relationshipType: d.relationshipType || 'none'
-    //     };
-        
-    //     const result = LawMapper.determineApplicableLaws(lawMapperData);
-        
-    //     // Call LawMapper.displayApplicableLaws - it will find the container by ID
-    //     LawMapper.displayApplicableLaws(result.applicableLaws, result.externalAssistance);
-    // } else {
-    //     const lawsContainer = document.getElementById('applicableLawsContainer');
-    //     if (lawsContainer) {
-    //         lawsContainer.innerHTML = `
-    //             <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-    //                 <div class="flex items-start gap-3">
-    //                     <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-    //                     <div class="flex-1">
-    //                         <p class="text-sm text-gray-700">Need legal guidance? Contact OASH: (049) 501-1844 | oash.uplb@up.edu.ph</p>
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //         `;
-    //     }
-    // }
+    // Hide the policy container (no full UI in admin view)
+    const lawsContainer = document.getElementById('applicableLawsContainer');
+    if (lawsContainer) lawsContainer.style.display = 'none';
     
     document.getElementById('viewModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 };
 
-// Add this helper function if not already present
 function getStatusClass(status) {
     const statusMap = {
         'pending': 'bg-yellow-100 text-yellow-800',
@@ -935,7 +820,7 @@ function escapeHtml(str) {
     }); 
 }
 
-// Event listeners with debounced filtering
+// Event listeners
 document.getElementById('searchInput')?.addEventListener('input', () => applyFilters());
 document.getElementById('statusFilter')?.addEventListener('change', () => applyFilters());
 document.getElementById('offenseFilter')?.addEventListener('change', () => applyFilters());

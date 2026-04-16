@@ -12,7 +12,7 @@
         { value: "friend", text: "Friend" },
         { value: "outsider/stranger", text: "Outsider/Stranger" },
         { value: "with moral ascendancy", text: "With Moral Ascendancy" },
-        { value: "with intimate", text: "With Intimate" }
+        { value: "with intimate", text: "With Intimate Relationship (e.g. Boyfriend/Girlfriend, Husband/Wife" }
     ];
 
     // Static classification options (for both complainant and respondent) – display text capitalized

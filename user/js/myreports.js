@@ -57,6 +57,116 @@ function getStatusText(status) {
     return statusMap[status?.toLowerCase()] || 'Pending';
 }
 
+// ASH Code Penalty Table
+function getASHPenalty(report) {
+    const classification = report.complainedClassification || '';
+    const severity = report.predictedSeverity || 'Light';
+    const offenseLevel = report.offenseLevel || 'First offense';
+    
+    // Determine if perpetrator is student or personnel
+    const isStudent = classification === 'Student';
+    const isPersonnel = ['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(classification);
+    
+    // Fallback to stored value if classification unknown
+    if (!isStudent && !isPersonnel) {
+        return report.recommendedSanction || 'N/A';
+    }
+    
+    // Map offense level to numeric count
+    let offenseNumber = 1;
+    if (offenseLevel.includes('Second')) offenseNumber = 2;
+    else if (offenseLevel.includes('Third')) offenseNumber = 3;
+    else if (offenseLevel.includes('Multiple')) offenseNumber = 3;
+    
+    // ASH Code penalties
+    if (isStudent) {
+        if (severity === 'Light') {
+            if (offenseNumber === 1) return 'Reprimand or community service not exceeding 30 hours';
+            if (offenseNumber === 2) return 'Suspension for not exceeding one (1) semester';
+            return 'Expulsion';
+        }
+        if (severity === 'Less Grave') {
+            if (offenseNumber === 1) return 'Community service of 60 hours';
+            if (offenseNumber === 2) return 'Suspension for one (1) year';
+            return 'Expulsion';
+        }
+        if (severity === 'Grave') {
+            return 'Suspension for one (1) academic year to expulsion';
+        }
+    }
+    
+    if (isPersonnel) {
+        if (severity === 'Light') {
+            if (offenseNumber === 1) return 'Reprimand or suspension for one (1) month and one (1) day to six (6) months';
+            if (offenseNumber === 2) return 'Fine or suspension for six (6) months and one (1) day to one (1) year';
+            return 'Dismissal';
+        }
+        if (severity === 'Less Grave') {
+            if (offenseNumber === 1) return 'Suspension for six (6) months and one (1) day to one (1) year';
+            return 'Dismissal';
+        }
+        if (severity === 'Grave') {
+            return 'Dismissal';
+        }
+    }
+    
+    return report.recommendedSanction || 'N/A';
+}
+
+// Get law names for display (stored or computed)
+function getLawNamesForDisplay(report) {
+    // If stored value exists and is not 'N/A', use it
+    if (report.applicableLaws && report.applicableLaws !== 'N/A' && report.applicableLaws.trim() !== '') {
+        return report.applicableLaws;
+    }
+    
+    // Otherwise compute using LawMapper
+    if (typeof LawMapper !== 'undefined' && LawMapper.determineApplicableLaws) {
+        // Build context similar to law-mapper's mapLawsFromReport
+        const context = {
+            victimClassification: report.classification || '',
+            complainedClassification: report.complainedClassification || '',
+            victimConstituent: report.victimConstituent || '',
+            complainedConstituent: report.complainedConstituent || '',
+            relationshipType: report.relationshipType || deriveRelationshipTypeFromReport(report),
+            incidentLocation: report.incidentLocation || mapIncidentLocationFromReport(report)
+        };
+        try {
+            const result = LawMapper.determineApplicableLaws(context, null);
+            const laws = result.applicableLaws || [];
+            // Filter out any "Contact details" entries
+            const cleanLaws = laws.filter(law => !law.includes('Contact details'));
+            return cleanLaws.length ? cleanLaws.join(', ') : 'RA 11313';
+        } catch (e) {
+            console.warn('Error computing laws:', e);
+        }
+    }
+    return 'RA 11313';
+}
+
+// Helper to derive relationship type from report (simplified version of law-mapper's logic)
+function deriveRelationshipTypeFromReport(report) {
+    const victimClass = report.classification;
+    const perpClass = report.complainedClassification;
+    if (!victimClass || !perpClass) return '';
+    // Simple mapping – adjust as needed
+    if (victimClass === 'Student' && perpClass === 'Student') return 'student';
+    if (victimClass === 'Student' && ['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(perpClass)) return 'professor';
+    if (['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(victimClass) && perpClass === 'Student') return 'student';
+    if (['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(victimClass) && ['instructor/professor', 'non-teaching personnel (admin & reps)'].includes(perpClass)) return 'colleague';
+    return '';
+}
+
+function mapIncidentLocationFromReport(report) {
+    if (report.incidentLocation) return report.incidentLocation;
+    const inside = report.complainedInsideCampus;
+    if (inside === 'Inside the campus') return 'inside_campus';
+    if (inside === 'Outside the campus, but UPLB activity') return 'outside_uplb_activity';
+    if (inside === 'Outside the campus and not UPLB activity') return 'outside_not_uplb';
+    return '';
+}
+
+
 let reportsData = [];
 let currentPage = 1;
 let totalPages = 1;
@@ -195,23 +305,19 @@ window.viewReportDetails = async function(report) {
     
     try {
         const token = getAuthToken();
-        // Fetch all reports (limit set high enough to include the one we need)
         const response = await fetch(`https://safespace-back.onrender.com/api/v1/user/reports?limit=100`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
         
-        // Find the specific report by ID
         currentViewingReportId = report.reportId;
         const freshReport = data.data.find(r => r.reportId === report.reportId);
         if (!freshReport) {
             throw new Error('Report not found in the list');
         }
         
-        // Store globally for PDF or other uses
         window.currentReport = freshReport;
         
-        // Helper to format date (YYYY-MM-DD) to readable
         function formatIncidentDate(dateStr) {
             if (!dateStr) return 'N/A';
             const date = new Date(dateStr);
@@ -219,7 +325,6 @@ window.viewReportDetails = async function(report) {
             return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
         }
         
-        // Helper to format time (HH:MM)
         function formatIncidentTime(timeStr) {
             if (!timeStr) return 'N/A';
             const parts = timeStr.split(':');
@@ -233,13 +338,11 @@ window.viewReportDetails = async function(report) {
         
         modalContent.innerHTML = `
             <div class="max-h-[75vh] overflow-y-auto p-5">
-                <!-- Status and ID Row -->
                 <div class="flex flex-wrap justify-between items-center gap-3 pb-4 mb-4 border-b border-gray-200">
                     <span class="text-xs text-gray-500 font-mono">ID: ${freshReport.reportId || 'N/A'}</span>
                     <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(freshReport.status)}">${getStatusText(freshReport.status)}</span>
                 </div>
                 
-                <!-- All Fields in Simple Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-1 gap-x-6 gap-y-3">
                     <div class="flex py-2 border-b border-gray-100">
                         <div class="w-2/5 text-xs text-gray-500 font-medium">Full Name</div>
@@ -327,7 +430,6 @@ window.viewReportDetails = async function(report) {
                         <div class="w-3/5 text-sm text-gray-800">${freshReport.complainedExactLocation || 'N/A'}</div>
                     </div>
                     ` : ''}
-                    <!-- Incident Date & Time -->
                     <div class="flex py-2 border-b border-gray-100">
                         <div class="w-2/5 text-xs text-gray-500 font-medium">Incident Date</div>
                         <div class="w-3/5 text-sm text-gray-800">${formatIncidentDate(freshReport.incidentDate)}</div>
@@ -337,16 +439,8 @@ window.viewReportDetails = async function(report) {
                         <div class="w-3/5 text-sm text-gray-800">${formatIncidentTime(freshReport.incidentTime)}</div>
                     </div>
                     <div class="flex py-2 border-b border-gray-100">
-                        <div class="w-2/5 text-xs text-gray-500 font-medium">Procedure Type</div>
+                        <div class="w-2/5 text-xs text-gray-500 font-medium">Decision to Proceed with the Complaint</div>
                         <div class="w-3/5 text-sm text-gray-800">${freshReport.procedureType || 'N/A'}</div>
-                    </div>
-                    <div class="flex py-2 border-b border-gray-100">
-                        <div class="w-2/5 text-xs text-gray-500 font-medium">Where did you hear about us?</div>
-                        <div class="w-3/5 text-sm text-gray-800">${freshReport.whereDidYouHearAboutUs || 'N/A'}</div>
-                    </div>
-                    <div class="flex py-2 border-b border-gray-100">
-                        <div class="w-2/5 text-xs text-gray-500 font-medium">Other Source</div>
-                        <div class="w-3/5 text-sm text-gray-800">${freshReport.otherWhereDidYouHearAboutUs || 'N/A'}</div>
                     </div>
                     <div class="flex py-2 border-b border-gray-100">
                         <div class="w-2/5 text-xs text-gray-500 font-medium">Harassment Type</div>
@@ -358,15 +452,15 @@ window.viewReportDetails = async function(report) {
                     </div>
                     <div class="flex py-2 border-b border-gray-100">
                         <div class="w-2/5 text-xs text-gray-500 font-medium">Applicable Laws</div>
-                        <div class="w-3/5 text-sm text-gray-800">${freshReport.applicableLaws || 'N/A'}</div>
+                        <div class="w-3/5 text-sm text-gray-800">${getLawNamesForDisplay(freshReport)}</div>
                     </div>
                     <div class="flex py-2 border-b border-gray-100">
                         <div class="w-2/5 text-xs text-gray-500 font-medium">Offense Level</div>
                         <div class="w-3/5 text-sm text-gray-800">${freshReport.offenseLevel || 'N/A'}</div>
                     </div>
                     <div class="flex py-2 border-b border-gray-100">
-                        <div class="w-2/5 text-xs text-gray-500 font-medium">Applicable Penalties</div>
-                        <div class="w-3/5 text-sm text-gray-800 penalty-value">${freshReport.recommendedSanction || 'N/A'}</div>
+                        <div class="w-2/5 text-xs text-gray-500 font-medium">Recommended Sanction</div>
+                        <div class="w-3/5 text-sm text-gray-800">${getASHPenalty(freshReport)}</div>
                     </div>
                     <div class="flex py-2 border-b border-gray-100">
                         <div class="w-2/5 text-xs text-gray-500 font-medium">Remarks</div>
@@ -382,80 +476,16 @@ window.viewReportDetails = async function(report) {
                     </div>
                 </div>
                 
-                <!-- Long Text Fields -->
                 <div class="mt-6 space-y-4">
                     <div><div class="text-xs text-gray-500 font-medium mb-2">Incident Details</div><div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${freshReport.complainantStory || 'N/A'}</div></div>
                     <div><div class="text-xs text-gray-500 font-medium mb-2">Incident Event</div><div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${freshReport.complainedIncidentHappened || 'N/A'}</div></div>
-                    <div><div class="text-xs text-gray-500 font-medium mb-2">Physical Appearance</div><div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap">${freshReport.complainedPhysicalAppearance || 'N/A'}</div></div>
                 </div>
             </div>
-            <div id="applicableLawsContainer"></div>
         `;
         
-        // Display applicable laws using LawMapper
-        if (typeof LawMapper !== 'undefined') {
-            // Map incident location from your data structure
-            if (!freshReport.incidentLocation) {
-                if (freshReport.complainedInsideCampus === "Inside the campus") {
-                    freshReport.incidentLocation = 'inside_campus';
-                } else if (freshReport.complainedInsideCampus === "Outside the campus") {
-                    freshReport.incidentLocation = 'outside_not_uplb';
-                } else {
-                    freshReport.incidentLocation = '';
-                }
-            }
-            
-            // Create AI result object from freshReport if available
-            const aiResult = freshReport.predictedOffense && freshReport.predictedSeverity ? {
-                category: freshReport.predictedOffense || '',
-                severity: freshReport.predictedSeverity || '',
-                confidence: freshReport.aiConfidence || 0
-            } : null;
-            
-            // Use mapLawsFromReport which handles missing fields properly
-            LawMapper.mapLawsFromReport(freshReport, aiResult);
-            const mapRes = LawMapper.mapLawsFromReport(freshReport, aiResult);
-
-            console.log("Res", mapRes);
-
-            if (mapRes) {
-                const penaltyElement = document.querySelector('#modelContent .penalty-value');
-                if (penaltyElement) {
-                    const allPunishments = mapRes.punishments
-                        ?.map((p, index) => {
-                            // Only include if punishment exists and is not empty string
-                            if (p.punishment && p.punishment.trim() !== '') {
-                                return `${index + 1}. ${p.punishment}`;
-                            }
-                            return null;
-                        })
-                        .filter(p => p !== null) // Remove null entries
-                        .join('\n');
-                    
-                    if (allPunishments && allPunishments.length > 0) {
-                        penaltyElement.innerHTML = allPunishments.replace(/\n/g, '<br>');
-                    } else {
-                        penaltyElement.textContent = 'No specific penalty information available';
-                    }
-                }
-            }
-        } else {
-            const lawsContainer = document.getElementById('applicableLawsContainer');
-            if (lawsContainer) {
-                lawsContainer.innerHTML = `
-                    <div class="p-5 border-t border-gray-200">
-                        <div class="bg-blue-50 rounded-lg p-4">
-                            <div class="flex items-start gap-3">
-                                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                                <div class="flex-1">
-                                    <p class="text-sm text-gray-700">Need assistance? Contact OASH: (049) 501-1844 | oash.uplb@up.edu.ph</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
+        // Hide policy container (no full UI in view mode)
+        const lawsContainer = document.getElementById('applicableLawsContainer');
+        if (lawsContainer) lawsContainer.style.display = 'none';
         
     } catch (error) {
         console.error('Error fetching report details:', error);
@@ -527,7 +557,7 @@ window.downloadPDF = async function() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OASH Intake Form - Report ${d.reportId || 'N/A'}</title>
+    <title>OASH Intake Form - Report ${report.reportId || report.id}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -620,6 +650,18 @@ window.downloadPDF = async function() {
             word-wrap: break-word;
         }
         .signature-line { border-bottom: 1px solid #333; height: 40px; margin: 5px 0; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        .status-pending { background: #FEF3C7; color: #92400E; }
+        .status-investigating { background: #DBEAFE; color: #1E40AF; }
+        .status-resolved { background: #D1FAE5; color: #065F46; }
         .report-id {
             text-align: right;
             font-size: 10px;
@@ -635,6 +677,14 @@ window.downloadPDF = async function() {
             line-height: 1.4; 
         }
         
+        /* Page break handling */
+        .section-break {
+            page-break-inside: avoid;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        
         @media print { 
             body { 
                 background-color: white; 
@@ -647,6 +697,16 @@ window.downloadPDF = async function() {
                 padding: 30px;
                 margin: 0;
             } 
+            .logo-top-left, .logo-top-right {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .section-title {
+                page-break-after: avoid;
+            }
+            .form-group {
+                page-break-inside: avoid;
+            }
         }
         
         @media (max-width: 768px) { 
@@ -673,99 +733,89 @@ window.downloadPDF = async function() {
         </div>
         
         <div class="report-id">
-            Report ID: ${d.reportId || 'N/A'} | Generated: ${new Date().toLocaleString()}
+            Report ID: ${report.reportId || report.id || 'N/A'} | Generated: ${new Date().toLocaleString()}
         </div>
 
         <div style="font-size: 13px; font-weight: bold; margin-top: 20px; margin-bottom: 15px; padding-top: 10px; border-top: none;">
             A. PERSONAL INFORMATION
         </div>
         
-        <div class="form-group"><label>1. Full name of Complainant:</label><div class="info-value">${escapeHtml(getFullName(d))}</div></div>
+        <div class="form-group"><label>1. Full name of Complainant:</label><div class="info-value">${escapeHtml(d.firstName || '')} ${escapeHtml(d.middleName || '')} ${escapeHtml(d.lastName || '')}</div></div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>2. Age:</label><div class="info-value">${escapeHtml(d.age)}</div></div>
-            <div class="form-col form-group"><label>3. I am biologically:</label><div class="info-value">${escapeHtml(d.biologicalSex)}</div></div>
+            <div class="form-col form-group"><label>2. Age:</label><div class="info-value">${d.age && d.age !== 'N/A' ? d.age : ''}</div></div>
+            <div class="form-col form-group"><label>3. I am biologically:</label><div class="info-value">${d.biologicalSex && d.biologicalSex !== 'N/A' ? d.biologicalSex : ''}</div></div>
         </div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>4. I identify myself as:</label><div class="info-value">${escapeHtml(d.identifiedAs)}</div></div>
-            <div class="form-col form-group"><label>5. Civil Status:</label><div class="info-value">${escapeHtml(d.civilStatus)}</div></div>
+            <div class="form-col form-group"><label>4. I identify myself as:</label><div class="info-value">${d.identifiedAs && d.identifiedAs !== 'N/A' ? d.identifiedAs : ''}</div></div>
+            <div class="form-col form-group"><label>5. Civil Status:</label><div class="info-value">${d.civilStatus && d.civilStatus !== 'N/A' ? d.civilStatus : ''}</div></div>
         </div>
         
-        <div class="form-group"><label>6. Present Address:</label><div class="info-value-multiline">${escapeHtml(d.presentAddress)}</div></div>
-        <div class="form-group"><label>7. Permanent Address:</label><div class="info-value-multiline">${escapeHtml(d.permanentAddress)}</div></div>
+        <div class="form-group"><label>6. Present Address:</label><div class="info-value-multiline">${d.presentAddress && d.presentAddress !== 'N/A' ? escapeHtml(d.presentAddress) : ''}</div></div>
+        <div class="form-group"><label>7. Permanent Address:</label><div class="info-value-multiline">${d.permanentAddress && d.permanentAddress !== 'N/A' ? escapeHtml(d.permanentAddress) : ''}</div></div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>8. Mobile no.:</label><div class="info-value">${escapeHtml(d.mobileNumber)}</div></div>
-            <div class="form-col form-group"><label>Landline no.:</label><div class="info-value">${escapeHtml(d.landLineNumber)}</div></div>
+            <div class="form-col form-group"><label>8. Mobile no.:</label><div class="info-value">${d.mobileNumber && d.mobileNumber !== 'N/A' ? d.mobileNumber : ''}</div></div>
+            <div class="form-col form-group"><label>Landline no.:</label><div class="info-value">${d.landLineNumber && d.landLineNumber !== 'N/A' ? d.landLineNumber : ''}</div></div>
         </div>
         
         <div class="form-group">
             <label>9. Classification:</label>
-            <div class="info-value">${escapeHtml(d.classification)}</div>
+            <div class="info-value">${d.classification && d.classification !== 'N/A' ? d.classification : ''}</div>
         </div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>College:</label><div class="info-value">${escapeHtml(d.college)}</div></div>
-            <div class="form-col form-group"><label>Department/Unit:</label><div class="info-value">${escapeHtml(d.department)}</div></div>
+            <div class="form-col form-group"><label>College:</label><div class="info-value">${d.college && d.college !== 'N/A' ? d.college : ''}</div></div>
+            <div class="form-col form-group"><label>Department/Unit:</label><div class="info-value">${d.department && d.department !== 'N/A' ? d.department : ''}</div></div>
         </div>
 
         <div class="section-title">B. RESPONDENT(S) NAME(S) (person being complained)</div>
-        <div class="form-group"><label>Full name of Person being complained:</label><div class="info-value">${escapeHtml(d.complainedFullName)}</div></div>
+        <div class="form-group"><label>Full name of Person being complained:</label><div class="info-value">${d.complainedFullName && d.complainedFullName !== 'N/A' ? escapeHtml(d.complainedFullName) : ''}</div></div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>Sex:</label><div class="info-value">${escapeHtml(d.complainedSex)}</div></div>
+            <div class="form-col form-group"><label>Sex:</label><div class="info-value">${d.complainedSex && d.complainedSex !== 'N/A' ? d.complainedSex : ''}</div></div>
         </div>
         
         <div class="form-group">
             <label>Classification:</label>
-            <div class="info-value">${escapeHtml(d.complainedClassification)}</div>
+            <div class="info-value">${d.complainedClassification && d.complainedClassification !== 'N/A' ? d.complainedClassification : ''}</div>
         </div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>College:</label><div class="info-value">${escapeHtml(d.complainedCollege)}</div></div>
-            <div class="form-col form-group"><label>Department/Unit:</label><div class="info-value">${escapeHtml(d.complainedDepartment)}</div></div>
+            <div class="form-col form-group"><label>College:</label><div class="info-value">${d.complainedCollege && d.complainedCollege !== 'N/A' ? d.complainedCollege : ''}</div></div>
+            <div class="form-col form-group"><label>Department/Unit:</label><div class="info-value">${d.complainedDepartment && d.complainedDepartment !== 'N/A' ? d.complainedDepartment : ''}</div></div>
         </div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>Is the Victim a UP Constituent?</label><div class="info-value">${escapeHtml(d.victimConstituent)}</div></div>
-            <div class="form-col form-group"><label>Is the Perpetrator a UP Constituent?</label><div class="info-value">${escapeHtml(d.complainedConstituent)}</div></div>
+            <div class="form-col form-group"><label>Is the Victim a UP Constituent?</label><div class="info-value">${d.victimConstituent && d.victimConstituent !== 'N/A' ? escapeHtml(d.victimConstituent) : ''}</div></div>
+            <div class="form-col form-group"><label>Is the Perpetrator a UP Constituent?</label><div class="info-value">${d.complainedConstituent && d.complainedConstituent !== 'N/A' ? escapeHtml(d.complainedConstituent) : ''}</div></div>
         </div>
         
-        <div class="form-group"><label>Did the incident happen inside campus premises?</label><div class="info-value">${escapeHtml(d.complainedInsideCampus)}</div></div>
+        <div class="form-group"><label>Did the incident happen inside campus premises?</label><div class="info-value">${d.complainedInsideCampus && d.complainedInsideCampus !== 'N/A' ? escapeHtml(d.complainedInsideCampus) : ''}</div></div>
         
         ${d.complainedInsideCampus === "Inside the campus" ? `
-        <div class="form-group"><label>Incident Exact Location:</label><div class="info-value-multiline">${escapeHtml(d.complainedExactLocation)}</div></div>
+        <div class="form-group"><label>Incident Exact Location:</label><div class="info-value-multiline">${d.complainedExactLocation && d.complainedExactLocation !== 'N/A' ? escapeHtml(d.complainedExactLocation) : ''}</div></div>
         ` : ''}
 
         <div class="section-title">C. COMPLAINANT'S STORY</div>
-        <div class="form-group"><div class="info-value-multiline" style="min-height: 150px;">${escapeHtml(d.complainantStory)}</div></div>
+        <div class="form-group"><div class="info-value-multiline" style="min-height: 150px;">${d.complainantStory && d.complainantStory !== 'N/A' ? escapeHtml(d.complainantStory) : ''}</div></div>
         <div class="guidelines"><strong>Guidelines:</strong> Include who was involved, what specific behavior occurred, when it happened, where it occurred, why it may have happened, and how you responded.</div>
 
         <div class="form-row">
-            <div class="form-col form-group"><label>Date of incident:</label><div class="info-value">${formatIncidentDate(d.incidentDate)}</div></div>
-            <div class="form-col form-group"><label>Time of incident:</label><div class="info-value">${formatIncidentTime(d.incidentTime)}</div></div>
+            <div class="form-col form-group"><label>Date of incident:</label><div class="info-value">${d.incidentDate ? new Date(d.incidentDate).toLocaleDateString() : ''}</div></div>
+            <div class="form-col form-group"><label>Time of incident:</label><div class="info-value">${d.incidentTime || ''}</div></div>
         </div>
         
-        <div class="section-title">D. Options to proceed with the complaint:</div>
-        <div class="form-group"><div class="info-value-multiline">${escapeHtml(d.complainedIncidentHappened)}</div></div>
-        
-        <div class="form-group"><label>Physical Appearance of Respondent:</label><div class="info-value-multiline">${escapeHtml(d.complainedPhysicalAppearance)}</div></div>
-        
-        <div class="form-group"><label>Procedure Type:</label><div class="info-value">${escapeHtml(d.procedureType)}</div></div>
+        <div class="section-title">D. Decision to Proceed with the Complaint:</div>
+        <div class="form-group"><div class="info-value-multiline">${escapeHtml(d.procedureType)}</div></div>
 
-        <div class="section-title">E. WHERE DID YOU HEAR ABOUT OASH?</div>
-        <div class="form-group"><div class="info-value">${escapeHtml(d.whereDidYouHearAboutUs)}</div></div>
-        ${d.otherWhereDidYouHearAboutUs ? `<div class="form-group"><label>Other Source:</label><div class="info-value">${escapeHtml(d.otherWhereDidYouHearAboutUs)}</div></div>` : ''}
-
-        <div class="section-title">F. RECORD INFORMATION</div>
+        <div class="section-title">E. RECORDED INFORMATION</div>
         
         <div class="form-row">
-            <div class="form-col form-group"><label>Status:</label><div class="info-value">${getStatusText(d.status)}</div></div>
-            <div class="form-col form-group"><label>Date Reported:</label><div class="info-value">${formatDate(d.createdAt)}</div></div>
+            <div class="form-col form-group"><label>Recorded by:</label><div class="info-value">${d.recordedBy || ''}</div></div>
+            <div class="form-col form-group"><label>Date:</label><div class="info-value">${d.recordedDate ? new Date(d.recordedDate).toLocaleDateString() : ''}</div></div>
         </div>
-        
-        <div class="form-group"><label>Last Updated:</label><div class="info-value">${formatDate(d.updatedAt)}</div></div>
         
         <div class="form-group"><label>Complainant's Name and Signature:</label><div class="signature-line"></div></div>
         
@@ -788,11 +838,11 @@ window.downloadPDF = async function() {
                 if (typeof toast !== 'undefined') toast.success('PDF Ready', 'Print dialog opened');
             };
         } else {
-            if (typeof toast !== 'undefined') toast.error('Popup Blocked', 'Please allow popups to generate PDF');
+            if (typeof toast !== 'undefined') toast.error('Popup Blocked', 'Please allow popups to download PDF');
         }
         
     } catch (error) {
-        console.error('Error generating PDF:', error);
+        console.error(error);
         if (typeof toast !== 'undefined') toast.error('Error', 'Failed to generate PDF');
     }
 };

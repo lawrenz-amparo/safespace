@@ -1,4 +1,4 @@
-// map-law.js
+// map-law.js – updated with ASH Code and new dropdown support
 (function() {
     'use strict';
 

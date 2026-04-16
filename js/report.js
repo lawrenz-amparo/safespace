@@ -1,4 +1,4 @@
-// report.js
+// report.js – Full version with "Not Harassment" → "Not Sexual Harassment" normalization
 (function() {
     'use strict';
 
@@ -18,6 +18,11 @@
                 mobileMenu.classList.add('hidden');
             }
         });
+    }
+
+    // Helper: Normalize offense label (map "Not Harassment" to "Not Sexual Harassment")
+    function normalizeOffenseLabel(label) {
+        return label === 'Not Harassment' ? 'Not Sexual Harassment' : label;
     }
 
     // Helper: Format probability to 4 decimal places
@@ -46,11 +51,9 @@
 
     // Add classification badge to the result panel (renamed from addSeverityBadge)
     function addClassificationBadge(classificationLabel, classificationConfidence) {
-        // Use the new container ID from HTML
         const badgeContainer = document.getElementById('classificationLevelContainer');
         if (!badgeContainer) return;
         
-        // Clear existing content
         badgeContainer.innerHTML = '';
         
         let classificationColor = '';
@@ -95,7 +98,8 @@
         const severityData = apiResponse.severity;
         
         const offenseProbs = offenseData.probabilities;
-        const offenseLabel = offenseData.label;
+        // Normalize the offense label
+        const offenseLabel = normalizeOffenseLabel(offenseData.label);
         const offenseConfidence = offenseData.confidence;
         
         const severityLabel = severityData.label;
@@ -108,32 +112,30 @@
         harassmentTypeResult.innerHTML = `${offenseLabel}`;
         confidenceText.innerHTML = `Confidence: ${formatPercent(offenseConfidence)}% | Classification: ${severityLabel} (${formatPercent(severityConfidence)}%)`;
         
-        // Update probability values
+        // Update probability values (use normalized key for "Not Sexual Harassment")
         document.getElementById('probPhyVal').innerHTML = formatProb(offenseProbs["Physical Harassment"] || 0);
         document.getElementById('probVerbVal').innerHTML = formatProb(offenseProbs["Verbal Harassment"] || 0);
         document.getElementById('probNonvVal').innerHTML = formatProb(offenseProbs["Non-Verbal Harassment"] || 0);
-        // CHANGED: "Not Harassment" -> "Not Sexual Harassment"
-        document.getElementById('probNotVal').innerHTML = formatProb(offenseProbs["Not Sexual Harassment"] || 0);
+        document.getElementById('probNotVal').innerHTML = formatProb(offenseProbs["Not Sexual Harassment"] || offenseProbs["Not Harassment"] || 0);
         document.getElementById('probCybVal').innerHTML = formatProb(offenseProbs["Cyber Sexual Harassment"] || 0);
         
         // Update progress bars
-        document.getElementById('probPhyBar').style.width = (offenseProbs["Physical Harassment"] * 100) + '%';
-        document.getElementById('probVerbBar').style.width = (offenseProbs["Verbal Harassment"] * 100) + '%';
-        document.getElementById('probNonvBar').style.width = (offenseProbs["Non-Verbal Harassment"] * 100) + '%';
-        // CHANGED: "Not Harassment" -> "Not Sexual Harassment"
-        document.getElementById('probNotBar').style.width = (offenseProbs["Not Sexual Harassment"] * 100) + '%';
-        document.getElementById('probCybBar').style.width = (offenseProbs["Cyber Sexual Harassment"] * 100) + '%';
+        document.getElementById('probPhyBar').style.width = ((offenseProbs["Physical Harassment"] || 0) * 100) + '%';
+        document.getElementById('probVerbBar').style.width = ((offenseProbs["Verbal Harassment"] || 0) * 100) + '%';
+        document.getElementById('probNonvBar').style.width = ((offenseProbs["Non-Verbal Harassment"] || 0) * 100) + '%';
+        document.getElementById('probNotBar').style.width = ((offenseProbs["Not Sexual Harassment"] || offenseProbs["Not Harassment"] || 0) * 100) + '%';
+        document.getElementById('probCybBar').style.width = ((offenseProbs["Cyber Sexual Harassment"] || 0) * 100) + '%';
         
         // Update description
         const shortDesc = descriptionText.length > 280 ? descriptionText.substring(0, 277) + '...' : descriptionText;
         document.getElementById('resultDescription').innerHTML = `“${escapeHtml(shortDesc)}”`;
         
-        // Add classification badge (renamed)
+        // Add classification badge
         addClassificationBadge(severityLabel, severityConfidence);
         
-        // Store AI result for later use
+        // Store AI result for later use (with normalized category)
         currentAiResult = {
-            category: offenseLabel,
+            category: offenseLabel, // already normalized
             severity: severityLabel
         };
         
@@ -186,7 +188,6 @@
 
     // Call backend API
     async function callHarassmentAPI(description) {
-    //  const API_URL = '/api/predict';
         const API_URL = 'http://178.128.114.206/predict';
         
         const requestBody = {

@@ -1,4 +1,4 @@
-// Configure physics toast
+// report.js
 if (typeof toast !== 'undefined') {
     toast.defaults = {
         position: 'top-right',
@@ -11,17 +11,6 @@ if (typeof toast !== 'undefined') {
 
 function getAuthToken() {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
-}
-
-function updateUserInfo() {
-    const token = getAuthToken();
-    if (token) {
-        document.getElementById('sidebarUserName').textContent = 'User';
-        document.getElementById('sidebarUserEmail').textContent = 'user@uplb.edu.ph';
-    } else {
-        document.getElementById('sidebarUserName').textContent = 'Not logged in';
-        document.getElementById('sidebarUserEmail').textContent = 'Please login';
-    }
 }
 
 function handleLogout() {
@@ -47,8 +36,8 @@ function checkAuth() {
     return true;
 }
 
+// Campus locations (same as before)
 const campusLocations = [
-    // College of Arts and Sciences (CAS) & General Academic Units
     "Physical Sciences Building (PhySci / PS / PSC)",
     "Biological Sciences Building (BioSci / IBS)",
     "Mathematics Building",
@@ -61,8 +50,6 @@ const campusLocations = [
     "IBS Lecture Hall (IBSLH)",
     "Physical Science Lecture Halls (PSLH A, B, C)",
     "Humanities Building",
-    
-    // Administrative & General Purpose Buildings
     "Abelardo G. Samonte Hall (AGS / Ag. Samonte Hall)",
     "D.L. Umali Hall",
     "Student Union Building (SU)",
@@ -73,8 +60,6 @@ const campusLocations = [
     "University Registrar",
     "UPLB Gate / Guardhouse",
     "University Health Service",
-    
-    // College of Agriculture and Food Science (CAFS)
     "Institute of Plant Breeding (IPB complex)",
     "IPB Admin Building",
     "IPB Biotechnology Building",
@@ -89,45 +74,29 @@ const campusLocations = [
     "Agricultural Systems Institute (ASI)",
     "Institute of Weed Science, Entomology & Plant Pathology (IWEP)",
     "Animal housing & experimental farms",
-    
-    // College of Economics and Management (CEM)
     "CEM Main Building",
     "CEM Graduate Building",
     "ACCI (Agricultural Credit and Cooperatives Institute)",
-    
-    // College of Development Communication (CDC)
     "College of Development Communication (CDC Building)",
     "CDC Auditorium",
-    
-    // College of Engineering and Agro-Industrial Technology (CEAT)
     "CEAT Main Building",
     "Electrical Engineering Building",
     "Mechanical Engineering Building",
     "Agricultural & Biosystems Engineering Building",
     "Civil Engineering area structures",
-    
-    // College of Veterinary Medicine (CVM)
     "College of Veterinary Medicine Main Building (CVM Complex)",
     "Veterinary Teaching Hospital",
     "Diagnostic Laboratories",
-    
-    // College of Forestry and Natural Resources (CFNR)
     "CFNR Main Building / Administration",
     "Wood Science Building",
     "Forest Products Research buildings",
-    
-    // Other Institutes & Research Centers
     "UPLB Museum of Natural History",
     "SEARCA",
     "BIOTECH (National Institute of Molecular Biology & Biotechnology)",
     "Dairy Training and Research Institute (DTRI)",
     "Philippine Carabao Center (UPLB unit)",
-    
-    // Schools
     "UPLB Rural High School",
     "UPLB Elementary School",
-    
-    // Residence Halls & Housing
     "Men's Residence Hall",
     "Women's Residence Hall",
     "New Dormitory (co-ed)",
@@ -140,8 +109,6 @@ const campusLocations = [
     "Staff Housing / UPLB Housing Areas",
     "SEARCA Residence / Guest Housing",
     "Researcher / Visiting Scholar Housing",
-    
-    // Outdoor Areas & Parking
     "Pili Drive",
     "Freedom Park",
     "Oblation Park",
@@ -158,46 +125,39 @@ const campusLocations = [
 
 const locationSelect = document.getElementById('complainedInsideCampus');
 const exactLocationSelect = document.getElementById('complainedExactLocation');
-const exactLocationContainer = exactLocationSelect.parentElement;
+const exactLocationContainer = exactLocationSelect?.parentElement;
 
 function populateExactLocations() {
+    if (!exactLocationSelect) return;
     exactLocationSelect.innerHTML = '<option value="" disabled selected>— Select exact location —</option>';
-    
-    campusLocations.forEach(location => {
-        const option = document.createElement('option');
-        option.value = location;
-        option.textContent = location;
-        exactLocationSelect.appendChild(option);
+    campusLocations.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        exactLocationSelect.appendChild(opt);
     });
-    
-    // Add option for "Other" with text input
-    const otherOption = document.createElement('option');
-    otherOption.value = "other";
-    otherOption.textContent = "Other (Please specify)";
-    exactLocationSelect.appendChild(otherOption);
+    const other = document.createElement('option');
+    other.value = "other";
+    other.textContent = "Other (Please specify)";
+    exactLocationSelect.appendChild(other);
 }
 
 function toggleExactLocation() {
-    const selectedValue = locationSelect.value;
-    
-    if (selectedValue === "Inside the campus") {
+    if (!locationSelect || !exactLocationContainer) return;
+    if (locationSelect.value === "Inside the campus") {
         exactLocationContainer.style.display = "block";
-        exactLocationSelect.required = true;
-        
-        // Populate locations if not already populated
-        if (exactLocationSelect.options.length <= 1) {
-            populateExactLocations();
-        }
+        if (exactLocationSelect) exactLocationSelect.required = true;
+        if (exactLocationSelect && exactLocationSelect.options.length <= 1) populateExactLocations();
     } else {
         exactLocationContainer.style.display = "none";
-        exactLocationSelect.required = false;
-        exactLocationSelect.value = "";
+        if (exactLocationSelect) exactLocationSelect.required = false;
+        if (exactLocationSelect) exactLocationSelect.value = "";
     }
 }
 
 function handleOtherLocation() {
+    if (!exactLocationSelect) return;
     if (exactLocationSelect.value === "other") {
-        // Check if text input already exists
         let otherInput = document.getElementById('otherLocationInput');
         if (!otherInput) {
             otherInput = document.createElement('input');
@@ -206,111 +166,99 @@ function handleOtherLocation() {
             otherInput.placeholder = 'Please specify the exact location';
             otherInput.className = 'form-input mt-2';
             otherInput.required = exactLocationSelect.required;
-            
-            // Insert after the select element
             exactLocationSelect.parentNode.insertBefore(otherInput, exactLocationSelect.nextSibling);
         } else {
             otherInput.style.display = 'block';
         }
     } else {
         const otherInput = document.getElementById('otherLocationInput');
-        if (otherInput) {
-            otherInput.style.display = 'none';
-            otherInput.value = '';
-        }
+        if (otherInput) otherInput.style.display = 'none';
     }
 }
 
-// Add event listeners
-locationSelect.addEventListener('change', toggleExactLocation);
-exactLocationSelect.addEventListener('change', handleOtherLocation);
-
-// Initial state
+if (locationSelect) locationSelect.addEventListener('change', toggleExactLocation);
+if (exactLocationSelect) exactLocationSelect.addEventListener('change', handleOtherLocation);
 toggleExactLocation();
 
-// UPDATED: New classification options (same for both complainant and respondent)
+// Dropdown options
 const CLASSIFICATION_OPTIONS = [
     { value: "Student", text: "Student" },
-    { value: "instructor/professor", text: "instructor/professor" },
-    { value: "non-teaching personnel (admin & reps)", text: "non-teaching personnel (admin & reps)" },
+    { value: "instructor/professor", text: "Instructor/Professor" },
+    { value: "non-teaching personnel (admin & reps)", text: "Non-Teaching Personnel (Admin & Reps)" },
     { value: "Alumni", text: "Alumni" },
-    { value: "non-UP/outsider", text: "non-UP/outsider" }
+    { value: "non-UP/outsider", text: "Non-UP/Outsider" }
 ];
 
-// UPDATED: Static relationship options (no longer dependent on classification)
 const RELATIONSHIP_OPTIONS = [
-    { value: "student", text: "student" },
-    { value: "professor", text: "professor" },
-    { value: "colleague", text: "colleague" },
-    { value: "classmate", text: "classmate" },
-    { value: "orgmate", text: "orgmate" },
-    { value: "friend", text: "friend" },
-    { value: "outsider/stranger", text: "outsider/stranger" },
-    { value: "with moral ascendancy", text: "with moral ascendancy" },
-    { value: "with intimate", text: "with intimate" }
+    { value: "student", text: "Student" },
+    { value: "professor", text: "Professor" },
+    { value: "colleague", text: "Colleague" },
+    { value: "classmate", text: "Classmate" },
+    { value: "orgmate", text: "Orgmate" },
+    { value: "friend", text: "Friend" },
+    { value: "outsider/stranger", text: "Outsider/Stranger" },
+    { value: "with moral ascendancy", text: "With Moral Ascendancy" },
+    { value: "with intimate", text: "With Intimate Relationship (e.g. Boyfriend/Girldfriend, Husband/Wife)" }
 ];
 
 function updateComplainedClassificationOptions() {
-    const complainedClassificationSelect = document.getElementById('complainedClassification');
-    complainedClassificationSelect.innerHTML = '<option value="">Select classification</option>';
-    
-    CLASSIFICATION_OPTIONS.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option.value;
-        optionElement.textContent = option.text;
-        complainedClassificationSelect.appendChild(optionElement);
+    const select = document.getElementById('complainedClassification');
+    if (!select) return;
+    select.innerHTML = '<option value="">Select classification</option>';
+    CLASSIFICATION_OPTIONS.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        select.appendChild(option);
     });
 }
 
 function updateRelationshipOptions() {
-    const relationshipSelect = document.getElementById('relationshipType');
-    relationshipSelect.innerHTML = '<option value="">Select relationship type</option>';
-    
-    RELATIONSHIP_OPTIONS.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option.value;
-        optionElement.textContent = option.text;
-        relationshipSelect.appendChild(optionElement);
+    const select = document.getElementById('relationshipType');
+    if (!select) return;
+    select.innerHTML = '<option value="">Select relationship type</option>';
+    RELATIONSHIP_OPTIONS.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        select.appendChild(option);
     });
 }
 
 function collectFormData() {
-    const victimConstituentRadio = document.querySelector('input[name="victimConstituent"]:checked');
-    const complainedConstituentRadio = document.querySelector('input[name="complainedConstituent"]:checked');
-    
+    const victimConstituent = document.querySelector('input[name="victimConstituent"]:checked');
+    const complainedConstituent = document.querySelector('input[name="complainedConstituent"]:checked');
     return {
-        firstName: document.getElementById('firstName').value.trim(),
-        middleName: document.getElementById('middleName').value.trim(),
-        lastName: document.getElementById('lastName').value.trim(),
-        age: document.getElementById('age').value,
-        biologicalSex: document.getElementById('biologicalSex').value,
-        identifiedAs: document.getElementById('identifiedAs').value,
-        civilStatus: document.getElementById('civilStatus').value,
-        mobileNumber: document.getElementById('mobileNumber').value.trim(),
-        landLineNumber: document.getElementById('landLineNumber').value.trim(),
-        presentAddress: document.getElementById('presentAddress').value.trim(),
-        permanentAddress: document.getElementById('permanentAddress').value.trim(),
-        classification: document.getElementById('classification').value,
-        college: document.getElementById('college').value.trim(),
-        department: document.getElementById('department').value.trim(),
-        victimConstituent: victimConstituentRadio ? victimConstituentRadio.value : '',
-        complainedFullName: document.getElementById('complainedFullName').value.trim(),
-        complainedSex: document.getElementById('complainedSex').value,
-        complainedClassification: document.getElementById('complainedClassification').value,
-        complainedCollege: document.getElementById('complainedCollege').value.trim(),
-        complainedDepartment: document.getElementById('complainedDepartment').value.trim(),
-        complainedConstituent: complainedConstituentRadio ? complainedConstituentRadio.value : '',
-        complainedInsideCampus: document.getElementById('complainedInsideCampus').value,
-        complainedExactLocation: document.getElementById('complainedExactLocation').value,
-        relationshipType: document.getElementById('relationshipType').value,
-        complainantStory: document.getElementById('complainantStory').value.trim(),
-        complainedIncidentHappened: document.getElementById('complainedIncidentHappened').value.trim(),
-        // REMOVED: complainedPhysicalAppearance field
-        procedureType: document.getElementById('procedureType').value,
-        remarks: document.getElementById('remarks').value.trim(),
-        // REMOVED: whereDidYouHearAboutUs and otherWhereDidYouHearAboutUs
-        incidentDate: document.getElementById('incidentDate').value,
-        incidentTime: document.getElementById('incidentTime').value
+        firstName: document.getElementById('firstName')?.value.trim() || '',
+        middleName: document.getElementById('middleName')?.value.trim() || '',
+        lastName: document.getElementById('lastName')?.value.trim() || '',
+        age: document.getElementById('age')?.value || '',
+        biologicalSex: document.getElementById('biologicalSex')?.value || '',
+        identifiedAs: document.getElementById('identifiedAs')?.value || '',
+        civilStatus: document.getElementById('civilStatus')?.value || '',
+        mobileNumber: document.getElementById('mobileNumber')?.value.trim() || '',
+        landLineNumber: document.getElementById('landLineNumber')?.value.trim() || '',
+        presentAddress: document.getElementById('presentAddress')?.value.trim() || '',
+        permanentAddress: document.getElementById('permanentAddress')?.value.trim() || '',
+        classification: document.getElementById('classification')?.value || '',
+        college: document.getElementById('college')?.value.trim() || '',
+        department: document.getElementById('department')?.value.trim() || '',
+        victimConstituent: victimConstituent ? victimConstituent.value : '',
+        complainedFullName: document.getElementById('complainedFullName')?.value.trim() || '',
+        complainedSex: document.getElementById('complainedSex')?.value || '',
+        complainedClassification: document.getElementById('complainedClassification')?.value || '',
+        complainedCollege: document.getElementById('complainedCollege')?.value.trim() || '',
+        complainedDepartment: document.getElementById('complainedDepartment')?.value.trim() || '',
+        complainedConstituent: complainedConstituent ? complainedConstituent.value : '',
+        complainedInsideCampus: document.getElementById('complainedInsideCampus')?.value || '',
+        complainedExactLocation: document.getElementById('complainedExactLocation')?.value || '',
+        relationshipType: document.getElementById('relationshipType')?.value || '',
+        complainantStory: document.getElementById('complainantStory')?.value.trim() || '',
+        complainedIncidentHappened: document.getElementById('complainedIncidentHappened')?.value.trim() || '',
+        procedureType: document.getElementById('procedureType')?.value || '',
+        remarks: document.getElementById('remarks')?.value.trim() || '',
+        incidentDate: document.getElementById('incidentDate')?.value || '',
+        incidentTime: document.getElementById('incidentTime')?.value || ''
     };
 }
 
@@ -318,22 +266,21 @@ function validateForm(data) {
     const required = [
         'firstName', 'middleName', 'lastName', 'age', 'biologicalSex', 'identifiedAs',
         'civilStatus', 'mobileNumber', 'presentAddress', 'permanentAddress',
-        'classification', 'college', 'department', 'victimConstituent',
-        'complainedFullName', 'complainedSex', 'complainedClassification', 
+        'classification', 'victimConstituent',
+        'complainedFullName', 'complainedSex', 'complainedClassification',
         'complainedConstituent', 'complainedInsideCampus', 'relationshipType',
         'complainantStory', 'complainedIncidentHappened', 'procedureType'
     ];
-    
     for (let field of required) {
         if (!data[field] || data[field] === '') {
             const fieldNames = {
                 firstName: 'First name', middleName: 'Middle name', lastName: 'Last name',
                 age: 'Age', biologicalSex: 'Biological sex', identifiedAs: 'Identified as',
                 civilStatus: 'Civil status', mobileNumber: 'Mobile number', presentAddress: 'Present address',
-                permanentAddress: 'Permanent address', classification: 'Classification', college: 'College',
-                department: 'Department', victimConstituent: 'Complainant is UP Constituent',
+                permanentAddress: 'Permanent address', classification: 'Complainant Classification',
+                victimConstituent: 'Complainant is UP Constituent',
                 complainedFullName: 'Respondent full name', complainedSex: 'Respondent sex',
-                complainedClassification: 'Respondent classification', complainedConstituent: 'Respondent is UP Constituent', 
+                complainedClassification: 'Respondent classification', complainedConstituent: 'Respondent is UP Constituent',
                 complainedInsideCampus: 'Incident location', relationshipType: 'Relationship with Respondent',
                 complainantStory: 'Complainant story', complainedIncidentHappened: 'Event when incident happened',
                 procedureType: 'Options to proceed'
@@ -342,79 +289,64 @@ function validateForm(data) {
             return false;
         }
     }
-    
-    // Updated checkboxes (now three)
-    const confirmAccuracy = document.getElementById('confirmAccuracy').checked;
-    const confirmConfidentiality = document.getElementById('confirmConfidentiality').checked;
-    const confirmAppointment = document.getElementById('confirmAppointment').checked;
-    
+    const confirmAccuracy = document.getElementById('confirmAccuracy')?.checked;
+    const confirmConfidentiality = document.getElementById('confirmConfidentiality')?.checked;
+    const confirmAppointment = document.getElementById('confirmAppointment')?.checked;
     if (!confirmAccuracy || !confirmConfidentiality || !confirmAppointment) {
         toast.warning('Confirmation required', 'Please confirm all three agreements to proceed.');
         return false;
     }
-    
     return true;
 }
 
 function updateApplicableLaws() {
     const formData = collectFormData();
-    
     if (formData.victimConstituent && formData.complainedConstituent && formData.relationshipType && formData.complainedClassification) {
-        const { applicableLaws } = determineApplicableLaws(formData);
-        displayApplicableLaws(applicableLaws);
+        if (window.LawMapper && window.LawMapper.determineApplicableLaws) {
+            const result = window.LawMapper.determineApplicableLaws(formData, null);
+            if (window.LawMapper.displayApplicableLaws) {
+                window.LawMapper.displayApplicableLaws(result.applicableLaws, result.externalAssistance, result.recommendedAction, null, formData);
+            }
+        }
     } else {
         const lawsContainer = document.getElementById('applicableLawsContainer');
-        if (lawsContainer) {
-            lawsContainer.style.display = 'none';
-        }
+        if (lawsContainer) lawsContainer.style.display = 'none';
     }
 }
 
 async function predictHarassment(description) {
     try {
-        const response = await fetch('/api/predict', {
+        const response = await fetch('http://178.128.114.206/predict', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-                description: description
-            })
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ description })
         });
-        
-        if (!response.ok) {
-            throw new Error('Prediction API request failed');
-        }        
-        const predictionData = await response.json();
+        if (!response.ok) throw new Error('Prediction API request failed');
+        const data = await response.json();
         return {
-            offenseLabel: predictionData.offense.label,
-            offenseConfidence: predictionData.offense.confidence,
-            severityLabel: predictionData.severity.label,
-            severityConfidence: predictionData.severity.confidence
+            offenseLabel: data.offense.label,
+            offenseConfidence: data.offense.confidence,
+            severityLabel: data.severity.label,
+            severityConfidence: data.severity.confidence
         };
     } catch (error) {
-        console.error('Error calling prediction API:', error);
+        console.error('Prediction error:', error);
         return null;
     }
 }
 
 async function translateToEnglish(text) {
     if (!text.trim()) return text;
-    
     try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=tl&tl=en&dt=t&q=${encodeURIComponent(text)}`;
         const response = await fetch(url);
         const data = await response.json();
-        
         if (data && data[0]) {
-            let translatedText = '';
+            let translated = '';
             for (let i = 0; i < data[0].length; i++) {
-                if (data[0][i][0]) {
-                    translatedText += data[0][i][0];
-                }
+                if (data[0][i][0]) translated += data[0][i][0];
             }
-            return translatedText || text;
+            return translated || text;
         }
         return text;
     } catch (error) {
@@ -430,49 +362,36 @@ async function submitReport() {
         window.location.href = '/login.html';
         return;
     }
-    
     const formData = collectFormData();
-    
-    if (!validateForm(formData)) {
-        return;
+    if (!validateForm(formData)) return;
+    if (window.LawMapper && window.LawMapper.determineApplicableLaws) {
+        const result = window.LawMapper.determineApplicableLaws(formData, null);
+        formData.applicableLaws = result.applicableLaws;
+    } else {
+        formData.applicableLaws = [];
     }
-    
-    const { applicableLaws } = determineApplicableLaws(formData);
-    formData.applicableLaws = applicableLaws;
-    
-    // Add loading indicator for prediction
     const submitBtn = document.getElementById('submitReportBtn');
     const saveDraftBtn = document.getElementById('saveDraftBtn');
-    
     submitBtn.disabled = true;
     saveDraftBtn.disabled = true;
-    const originalSubmitHTML = submitBtn.innerHTML;
+    const originalHTML = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing report...';
-    
     try {
-        const translatedDescription = await translateToEnglish(formData.complainantStory);
-        console.log("Translated Text From User", translatedDescription);
-
-        // Call prediction API first
-        const predictionResult = await predictHarassment(translatedDescription);
-        
-        if (predictionResult) {
-            formData.predictedOffense = predictionResult.offenseLabel;
-            formData.predictedOffenseConfidence = predictionResult.offenseConfidence;
-            formData.predictedSeverity = predictionResult.severityLabel;
-            formData.predictedSeverityConfidence = predictionResult.severityConfidence;
+        const translated = await translateToEnglish(formData.complainantStory);
+        const prediction = await predictHarassment(translated);
+        if (prediction) {
+            formData.predictedOffense = prediction.offenseLabel;
+            formData.predictedOffenseConfidence = prediction.offenseConfidence;
+            formData.predictedSeverity = prediction.severityLabel;
+            formData.predictedSeverityConfidence = prediction.severityConfidence;
         } else {
-            // Set default values if prediction fails
             formData.predictedOffense = 'Not Available';
             formData.predictedOffenseConfidence = 0;
             formData.predictedSeverity = 'Not Available';
             formData.predictedSeverityConfidence = 0;
-            toast.warning('Prediction service unavailable', 'Continuing with report submission without AI analysis.');
+            toast.warning('Prediction service unavailable', 'Continuing without AI analysis.');
         }
-        
-        // Update button text for actual submission
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-        
         const response = await fetch('https://safespace-back.onrender.com/api/v1/user/report', {
             method: 'POST',
             headers: {
@@ -482,37 +401,30 @@ async function submitReport() {
             },
             body: JSON.stringify(formData)
         });
-        
         const data = await response.json();
-        
         if (response.ok) {
             toast.success('Report submitted!', 'Your report has been successfully filed.');
             document.getElementById('reportForm').reset();
             document.getElementById('confirmAccuracy').checked = false;
             document.getElementById('confirmConfidentiality').checked = false;
             document.getElementById('confirmAppointment').checked = false;
-            
             const radioGroups = ['victimConstituent', 'complainedConstituent', 'complainedInsideCampus'];
             radioGroups.forEach(group => {
                 const radios = document.querySelectorAll(`input[name="${group}"]`);
                 radios.forEach(radio => radio.checked = false);
             });
-            
             const lawsContainer = document.getElementById('applicableLawsContainer');
-            if (lawsContainer) {
-                lawsContainer.style.display = 'none';
-            }
+            if (lawsContainer) lawsContainer.style.display = 'none';
         } else {
-            let errorMsg = data.message || 'Failed to submit report. Please try again.';
-            toast.error('Submission failed', errorMsg);
+            toast.error('Submission failed', data.message || 'Failed to submit report.');
         }
     } catch (error) {
-        console.error('Report submission error:', error);
-        toast.error('Connection error', 'Unable to connect to the server. Please check your connection.');
+        console.error('Submission error:', error);
+        toast.error('Connection error', 'Unable to connect to server.');
     } finally {
         submitBtn.disabled = false;
         saveDraftBtn.disabled = false;
-        submitBtn.innerHTML = originalSubmitHTML;
+        submitBtn.innerHTML = originalHTML;
     }
 }
 
@@ -526,7 +438,6 @@ function loadDraft() {
     const draft = localStorage.getItem('reportDraft');
     if (draft) {
         const formData = JSON.parse(draft);
-        
         Object.keys(formData).forEach(key => {
             const element = document.getElementById(key);
             if (element) {
@@ -538,63 +449,40 @@ function loadDraft() {
                 }
             }
         });
-        
-        // Explicitly set incident date/time
-        if (document.getElementById('incidentDate') && formData.incidentDate) {
+        if (document.getElementById('incidentDate') && formData.incidentDate)
             document.getElementById('incidentDate').value = formData.incidentDate;
-        }
-        if (document.getElementById('incidentTime') && formData.incidentTime) {
+        if (document.getElementById('incidentTime') && formData.incidentTime)
             document.getElementById('incidentTime').value = formData.incidentTime;
-        }
-        
         updateApplicableLaws();
         toast.info('Draft loaded', 'Your saved draft has been loaded.');
     }
 }
 
-document.getElementById('reportForm').addEventListener('submit', async (e) => {
+document.getElementById('reportForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     await submitReport();
 });
-
-document.getElementById('saveDraftBtn').addEventListener('click', () => {
-    saveDraft();
-});
-
-document.getElementById('logoutBtn').addEventListener('click', (e) => {
+document.getElementById('saveDraftBtn')?.addEventListener('click', saveDraft);
+document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     handleLogout();
 });
-
-document.getElementById('mobileLogoutBtn').addEventListener('click', (e) => {
+document.getElementById('mobileLogoutBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     handleLogout();
 });
-
-// REMOVED: whereDidYouHearAboutUs event listener (field removed)
-
-document.getElementById('classification').addEventListener('change', () => {
+document.getElementById('classification')?.addEventListener('change', () => {
     updateComplainedClassificationOptions();
     updateRelationshipOptions();
     updateApplicableLaws();
 });
-
 document.querySelectorAll('input[name="victimConstituent"], input[name="complainedConstituent"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        updateApplicableLaws();
-    });
+    radio.addEventListener('change', () => updateApplicableLaws());
 });
-
-document.getElementById('relationshipType').addEventListener('change', () => {
-    updateApplicableLaws();
-});
-
-document.getElementById('complainedClassification').addEventListener('change', () => {
-    updateApplicableLaws();
-});
+document.getElementById('relationshipType')?.addEventListener('change', updateApplicableLaws);
+document.getElementById('complainedClassification')?.addEventListener('change', updateApplicableLaws);
 
 if (checkAuth()) {
-    updateUserInfo();
     updateComplainedClassificationOptions();
     updateRelationshipOptions();
     loadDraft();
