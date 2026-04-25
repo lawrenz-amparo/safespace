@@ -90,10 +90,6 @@
         .hidden {
             display: none;
         }
-        /* Keep existing styles */
-        .sidebar-link, .mobile-nav-item, .filter-container, .reports-table, .pagination-container, .status-badge {
-            /* existing styles from your CSS */
-        }
     </style>
     <script>
         tailwind.config = {
@@ -116,12 +112,18 @@
     </script>
 </head>
 <body>
+    <!-- Desktop Sidebar -->
     <aside class="hidden md:block w-64 bg-white border-r border-[#EDE4E4] fixed h-screen overflow-y-auto">
         <div class="p-5 flex flex-col h-full">
-            <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-[#EDE4E4]">
-                <div class="w-8 h-8 rounded-md bg-up flex items-center justify-center">
-                    <i class="fas fa-shield-alt text-white text-sm"></i>
-                </div>
+            <!-- Logo section with UPLB + OASH -->
+            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-[#EDE4E4]">
+                <!-- UPLB Logo -->
+                <img src="../UPLB-logo.jpg" alt="UPLB Logo" class="h-8 w-auto">
+                <!-- Subtle divider -->
+                <div class="w-px h-6 bg-[#D4C5C5]"></div>
+                <!-- OASH Logo (replaces shield icon) -->
+                <img src="../Oash-logo.jpg" alt="OASH Logo" class="h-8 w-auto">
+                <!-- Wordmark -->
                 <span class="font-semibold text-[#6F1A1F] text-lg">UPLB OASH</span>
             </div>
             <nav class="flex-1 space-y-1">
@@ -142,6 +144,7 @@
         </div>
     </aside>
 
+    <!-- Mobile Bottom Nav -->
     <div class="mobile-bottom-nav md:hidden">
         <a href="/admin/dashboard.html" class="mobile-nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
         <a href="/admin/appointments.html" class="mobile-nav-item"><i class="fas fa-calendar-check"></i><span>Appts</span></a>
@@ -150,6 +153,7 @@
         <a href="/admin/my-account.html" class="mobile-nav-item"><i class="fas fa-user-circle"></i><span>Account</span></a>
     </div>
 
+    <!-- Main Content -->
     <main class="md:ml-64 min-h-screen">
         <div class="max-w-7xl mx-auto p-4 md:p-8 pb-28 md:pb-8">
             <div class="mb-6">

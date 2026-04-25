@@ -46,10 +46,15 @@
     <!-- Desktop Sidebar -->
     <aside class="hidden md:block w-64 bg-white border-r border-[#EDE4E4] fixed h-screen">
         <div class="p-5 flex flex-col h-full">
-            <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-[#EDE4E4]">
-                <div class="w-8 h-8 rounded-md bg-up flex items-center justify-center">
-                    <i class="fas fa-shield-alt text-white text-sm"></i>
-                </div>
+            <!-- Logo section with UPLB + OASH -->
+            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-[#EDE4E4]">
+                <!-- UPLB Logo -->
+                <img src="../UPLB-logo.jpg" alt="UPLB Logo" class="h-8 w-auto">
+                <!-- Subtle divider -->
+                <div class="w-px h-6 bg-[#D4C5C5]"></div>
+                <!-- OASH Logo (replaces shield icon) -->
+                <img src="../Oash-logo.jpg" alt="OASH Logo" class="h-8 w-auto">
+                <!-- Wordmark -->
                 <span class="font-semibold text-up text-lg">UPLB OASH</span>
             </div>
             <nav class="flex-1">
@@ -123,7 +128,7 @@
                 </div>
             </div>
 
-            <!-- Contact reminder card (updated OASH details) -->
+            <!-- Contact reminder card -->
             <div class="mt-6 bg-white border border-[#EDE4E4] rounded-lg p-4 max-w-md">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-headset text-up text-xl"></i>
@@ -137,7 +142,7 @@
         </div>
     </main>
 
-    <!-- Mobile Bottom Nav (hidden on desktop) -->
+    <!-- Mobile Bottom Nav -->
     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDE4E4] flex justify-around py-2 z-50">
         <a href="/user/dashboard.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-chart-pie text-lg"></i><span>Dashboard</span></a>
         <a href="/user/report.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-flag text-lg"></i><span>Report</span></a>
@@ -164,12 +169,10 @@
                         <label class="form-label">Phone number <span class="text-up">*</span></label>
                         <input type="tel" id="phoneNumber" class="form-input" placeholder="09171234567" required>
                     </div>
-                    <!-- PURPOSE (now comes before consultation mode) -->
                     <div class="mb-4">
                         <label class="form-label">Purpose <span class="text-up">*</span></label>
                         <input type="text" id="purpose" class="form-input" placeholder="e.g., inquiry about the case, counseling, paralegal advise" required>
                     </div>
-                    <!-- CONSULTATION MODE (updated options) -->
                     <div class="mb-4">
                         <label class="form-label">Consultation mode <span class="text-up">*</span></label>
                         <select id="consultationMode" class="form-select" required>
@@ -190,12 +193,10 @@
                             <input type="text" id="timePicker" class="form-input" placeholder="Select time (hourly slots only)" required>
                         </div>
                     </div>
-                    <!-- Renamed: Additional notes → Do you have questions/clarifications/concerns -->
                     <div class="mb-6">
                         <label class="form-label">Do you have questions/clarifications/concerns? (optional)</label>
                         <textarea id="additionalNotes" rows="3" class="form-textarea" placeholder="Any details that might help us prepare..."></textarea>
                     </div>
-                    <!-- Proof attachment note -->
                     <div class="bg-[#FDF8F8] p-4 rounded-lg border border-[#F0E4E4] mb-4">
                         <p class="text-sm text-[#6F5E5E] flex items-start gap-2">
                             <i class="fas fa-paperclip text-up mt-0.5"></i>

@@ -66,12 +66,16 @@
     <header class="fixed top-0 w-full bg-white/90 backdrop-blur-sm border-b border-[#EDE4E4] z-50">
         <div class="max-w-7xl mx-auto px-5 sm:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Logo + wordmark -->
+                <!-- Logo + wordmark with both logos -->
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-md bg-up flex items-center justify-center">
-                        <i class="fas fa-shield-alt text-white text-sm"></i>
-                    </div>
-                    <span class="font-semibold text-[#6F1A1F] text-lg tracking-tight">UPLB OASH</span>
+                    <!-- UPLB Logo -->
+                    <img src="UPLB-logo.jpg" alt="UPLB Logo" class="h-8 w-auto">
+                    <!-- Subtle divider -->
+                    <div class="w-px h-6 bg-[#D4C5C5] hidden sm:block"></div>
+                    <!-- OASH Logo (replaces shield icon) -->
+                    <img src="Oash-logo.jpg" alt="OASH Logo" class="h-8 w-auto">
+                    <!-- Wordmark -->
+                    <span class="font-semibold text-[#6F1A1F] text-lg tracking-tight hidden sm:inline">UPLB OASH</span>
                 </div>
 
                 <!-- Desktop navigation -->
@@ -276,9 +280,8 @@
             <div class="grid md:grid-cols-4 gap-8 text-sm">
                 <div>
                     <div class="flex items-center gap-2 mb-4">
-                        <div class="w-7 h-7 rounded bg-up flex items-center justify-center">
-                            <i class="fas fa-shield-alt text-white text-xs"></i>
-                        </div>
+                        <!-- OASH logo in footer -->
+                        <img src="Oash-logo.jpg" alt="OASH Logo" class="h-7 w-auto">
                         <span class="font-semibold text-up">UPLB OASH</span>
                     </div>
                     <p class="text-[#706565] text-xs leading-relaxed">Office of Student Counselling · UPLB</p>

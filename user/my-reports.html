@@ -1,190 +1,195 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-        <title>UPLB OASH · My reports</title>
-        <!-- Inter font -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-        <!-- Font Awesome 6 -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        <link rel="stylesheet" href="../animation/physics-toast.min.css">
-        <link rel="stylesheet" href="css/myreports.css">
-        <script src="../animation/physics-toast.min.js"></script>
-        <!-- Tailwind -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        },
-                        colors: {
-                            up: {
-                                DEFAULT: '#6F1A1F',
-                                light: '#8E3A3F',
-                                dark: '#510E12',
-                                muted: '#F1E4E5',
-                            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>UPLB OASH · My reports</title>
+    <!-- Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../animation/physics-toast.min.css">
+    <link rel="stylesheet" href="css/myreports.css">
+    <script src="../animation/physics-toast.min.js"></script>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    colors: {
+                        up: {
+                            DEFAULT: '#6F1A1F',
+                            light: '#8E3A3F',
+                            dark: '#510E12',
+                            muted: '#F1E4E5',
                         }
                     }
                 }
             }
-        </script>
-    </head>
-    <body>
-        <!-- Desktop Sidebar -->
-        <aside class="hidden md:block w-64 bg-white border-r border-[#EDE4E4] fixed h-screen">
-            <div class="p-5 flex flex-col h-full">
-                <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-[#EDE4E4]">
-                    <div class="w-8 h-8 rounded-md bg-up flex items-center justify-center">
-                        <i class="fas fa-shield-alt text-white text-sm"></i>
-                    </div>
-                    <span class="font-semibold text-[#6F1A1F] text-lg">UPLB OASH</span>
-                </div>
-                <nav class="flex-1">
-                    <a href="/user/dashboard.html" class="sidebar-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
-                    <a href="/user/report.html" class="sidebar-link"><i class="fas fa-flag"></i> File a report</a>
-                    <a href="/user/appointments.html" class="sidebar-link"><i class="fas fa-calendar-check"></i> Appointments</a>
-                    <a href="/user/my-reports.html" class="sidebar-link active"><i class="fas fa-folder-open"></i> My reports</a>
-                </nav>
-                <div class="pt-4 border-t border-[#EDE4E4]">
-                    <div class="px-1 pb-2">
-                        <div class="text-xs text-[#8F7E7E]">Logged in as</div>
-                        <div class="text-sm font-medium truncate" id="sidebarFullName">Loading...</div>
-                        <div class="text-xs text-[#8F7E7E] truncate" id="sidebarEmail">Loading...</div>
-                    </div>
-                    <a href="#" id="logoutBtn" class="sidebar-link text-[#B02B2B]"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div>
+        }
+    </script>
+</head>
+<body>
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:block w-64 bg-white border-r border-[#EDE4E4] fixed h-screen">
+        <div class="p-5 flex flex-col h-full">
+            <!-- Logo section with UPLB + OASH -->
+            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-[#EDE4E4]">
+                <!-- UPLB Logo -->
+                <img src="../UPLB-logo.jpg" alt="UPLB Logo" class="h-8 w-auto">
+                <!-- Subtle divider -->
+                <div class="w-px h-6 bg-[#D4C5C5]"></div>
+                <!-- OASH Logo (replaces shield icon) -->
+                <img src="../Oash-logo.jpg" alt="OASH Logo" class="h-8 w-auto">
+                <!-- Wordmark -->
+                <span class="font-semibold text-[#6F1A1F] text-lg">UPLB OASH</span>
             </div>
-        </aside>
+            <nav class="flex-1">
+                <a href="/user/dashboard.html" class="sidebar-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="/user/report.html" class="sidebar-link"><i class="fas fa-flag"></i> File a report</a>
+                <a href="/user/appointments.html" class="sidebar-link"><i class="fas fa-calendar-check"></i> Appointments</a>
+                <a href="/user/my-reports.html" class="sidebar-link active"><i class="fas fa-folder-open"></i> My reports</a>
+            </nav>
+            <div class="pt-4 border-t border-[#EDE4E4]">
+                <div class="px-1 pb-2">
+                    <div class="text-xs text-[#8F7E7E]">Logged in as</div>
+                    <div class="text-sm font-medium truncate" id="sidebarFullName">Loading...</div>
+                    <div class="text-xs text-[#8F7E7E] truncate" id="sidebarEmail">Loading...</div>
+                </div>
+                <a href="#" id="logoutBtn" class="sidebar-link text-[#B02B2B]"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </aside>
 
-        <!-- Main Content -->
-        <main class="md:ml-64 min-h-screen">
-            <div class="max-w-6xl mx-auto p-4 md:p-8 pb-28 md:pb-8">
-                <!-- Header -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <!-- Main Content -->
+    <main class="md:ml-64 min-h-screen">
+        <div class="max-w-6xl mx-auto p-4 md:p-8 pb-28 md:pb-8">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-semibold text-[#2A2424]">My reports</h1>
+                    <p class="text-[#655A5A] text-sm mt-1">Track your filed reports</p>
+                </div>
+                <a href="/user/report.html" class="btn-up text-sm self-start sm:self-center">
+                    <i class="fas fa-plus-circle"></i> File a report
+                </a>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-12 hidden">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <p class="text-[#655A5A]">Loading your reports...</p>
+            </div>
+
+            <!-- No Reports State -->
+            <div id="noReportsState" class="text-center py-12 hidden">
+                <i class="fas fa-folder-open text-5xl text-[#D4C5C5] mb-4"></i>
+                <p class="text-[#655A5A]">You haven't filed any reports yet.</p>
+                <a href="/user/report.html" class="inline-block mt-4 text-up hover:underline">File your first report →</a>
+            </div>
+
+            <!-- Desktop Table View (hidden on mobile) -->
+            <div class="hidden md:block bg-white rounded-xl border border-[#EDE4E4] p-5 overflow-x-auto" id="desktopView">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-semibold">All reports</h2>
+                    <span class="text-xs bg-up-muted text-up px-3 py-1 rounded-full" id="total-count">0 total</span>
+                </div>
+                <table class="w-full min-w-[1000px]">
+                    <thead>
+                        <tr class="bg-[#F9F4F4]">
+                            <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Name</th>
+                            <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Harassment Type</th>
+                            <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Classification</th>
+                            <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Respondent</th>
+                            <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Procedure</th>
+                            <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Status</th>
+                            <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="desktop-table-body"></tbody>
+                </table>
+                <!-- Desktop Pagination -->
+                <div class="flex justify-between items-center mt-6" id="desktop-pagination"></div>
+            </div>
+
+            <!-- Mobile Cards View (visible only on mobile) -->
+            <div class="md:hidden" id="mobile-cards-container"></div>
+
+            <!-- Mobile Pagination -->
+            <div class="md:hidden flex flex-col items-center gap-3 mt-4" id="mobile-pagination"></div>
+
+            <!-- Support Cards -->
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-white border border-[#EDE4E4] rounded-lg p-5 flex gap-4">
+                    <i class="fas fa-scale-balanced text-up text-2xl"></i>
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-semibold text-[#2A2424]">My reports</h1>
-                        <p class="text-[#655A5A] text-sm mt-1">Track your filed reports</p>
+                        <h3 class="font-medium text-sm">Need help?</h3>
+                        <p class="text-xs text-[#8F7E7E] mt-1">Set an appointment for guidance.</p>
+                        <a href="/user/appointments.html" class="text-up text-xs font-medium mt-2 inline-block">Set appointment →</a>
                     </div>
-                    <a href="/user/report.html" class="btn-up text-sm self-start sm:self-center">
-                        <i class="fas fa-plus-circle"></i> File a report
-                    </a>
                 </div>
-
-                <!-- Loading State -->
-                <div id="loadingState" class="text-center py-12 hidden">
-                    <div class="loading-spinner mx-auto mb-4"></div>
-                    <p class="text-[#655A5A]">Loading your reports...</p>
-                </div>
-
-                <!-- No Reports State -->
-                <div id="noReportsState" class="text-center py-12 hidden">
-                    <i class="fas fa-folder-open text-5xl text-[#D4C5C5] mb-4"></i>
-                    <p class="text-[#655A5A]">You haven't filed any reports yet.</p>
-                    <a href="/user/report.html" class="inline-block mt-4 text-up hover:underline">File your first report →</a>
-                </div>
-
-                <!-- Desktop Table View (hidden on mobile) -->
-                <div class="hidden md:block bg-white rounded-xl border border-[#EDE4E4] p-5 overflow-x-auto" id="desktopView">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-semibold">All reports</h2>
-                        <span class="text-xs bg-up-muted text-up px-3 py-1 rounded-full" id="total-count">0 total</span>
-                    </div>
-                    <table class="w-full min-w-[1000px]">
-                        <thead>
-                            <tr class="bg-[#F9F4F4]">
-                                <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Name</th>
-                                <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Harassment Type</th>
-                                <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Classification</th>
-                                <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Respondent</th>
-                                <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Procedure</th>
-                                <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]">Status</th>
-                                <th class="text-left p-3 text-xs font-semibold text-[#6F5E5E]"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="desktop-table-body"></tbody>
-                    </table>
-                    <!-- Desktop Pagination -->
-                    <div class="flex justify-between items-center mt-6" id="desktop-pagination"></div>
-                </div>
-
-                <!-- Mobile Cards View (visible only on mobile) -->
-                <div class="md:hidden" id="mobile-cards-container"></div>
-
-                <!-- Mobile Pagination -->
-                <div class="md:hidden flex flex-col items-center gap-3 mt-4" id="mobile-pagination"></div>
-
-                <!-- Support Cards -->
-                <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-white border border-[#EDE4E4] rounded-lg p-5 flex gap-4">
-                        <i class="fas fa-scale-balanced text-up text-2xl"></i>
-                        <div>
-                            <h3 class="font-medium text-sm">Need help?</h3>
-                            <p class="text-xs text-[#8F7E7E] mt-1">Set an appointment for guidance.</p>
-                            <a href="/user/appointments.html" class="text-up text-xs font-medium mt-2 inline-block">Set appointment →</a>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-[#EDE4E4] rounded-lg p-5 flex gap-4">
-                        <i class="fas fa-headset text-up text-2xl"></i>
-                        <div>
-                            <h3 class="font-medium text-[#2A2424]">Office of Student Counselling</h3>
-                            <p class="text-sm text-[#8F7E7E] mt-1">0991 896 9602 · oash.uplb@up.edu.ph</p>
-                            <p class="text-xs text-[#A18686] mt-1">2nd Floor IH Bldg. Jos B. Juliano Ave. Brgy. Batong Malake, Los Baños, Philippines, 4031</p>
-                        </div>
+                <div class="bg-white border border-[#EDE4E4] rounded-lg p-5 flex gap-4">
+                    <i class="fas fa-headset text-up text-2xl"></i>
+                    <div>
+                        <h3 class="font-medium text-[#2A2424]">Office of Student Counselling</h3>
+                        <p class="text-sm text-[#8F7E7E] mt-1">0991 896 9602 · oash.uplb@up.edu.ph</p>
+                        <p class="text-xs text-[#A18686] mt-1">2nd Floor IH Bldg. Jos B. Juliano Ave. Brgy. Batong Malake, Los Baños, Philippines, 4031</p>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+    </main>
 
-        <!-- Modal for View Details -->
-        <div id="reportModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="text-lg font-semibold text-[#2A2424]">Report Details</h3>
-                    <i class="fas fa-times modal-close" onclick="closeModal()"></i>
-                </div>
-                <div id="modalContent">
-                    <!-- Dynamic content will be inserted here -->
-                    <div id="applicableLawsContainer" class="px-6 py-4"></div>
-                </div>
-                <div class="px-6 py-4 bg-gray-50 rounded-b-2xl border-t border-gray-200 flex gap-3 justify-end">
-                    <button type="button" class="btn-cancel px-6 py-2.5 rounded-xl font-medium text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2" onclick="closeModal()">
-                        <i class="fas fa-times text-sm"></i>
-                        Close
-                    </button>
-                    <button type="button" class="btn-pdf px-6 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2" onclick="downloadPDF()">
-                        <i class="fas fa-download text-sm"></i>
-                        Download as PDF
-                    </button>
-                </div>
+    <!-- Modal for View Details -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-lg font-semibold text-[#2A2424]">Report Details</h3>
+                <i class="fas fa-times modal-close" onclick="closeModal()"></i>
+            </div>
+            <div id="modalContent">
+                <!-- Dynamic content will be inserted here -->
+                <div id="applicableLawsContainer" class="px-6 py-4"></div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 rounded-b-2xl border-t border-gray-200 flex gap-3 justify-end">
+                <button type="button" class="btn-cancel px-6 py-2.5 rounded-xl font-medium text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2" onclick="closeModal()">
+                    <i class="fas fa-times text-sm"></i>
+                    Close
+                </button>
+                <button type="button" class="btn-pdf px-6 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2" onclick="downloadPDF()">
+                    <i class="fas fa-download text-sm"></i>
+                    Download as PDF
+                </button>
             </div>
         </div>
+    </div>
 
-        <!-- Mobile Bottom Nav -->
-        <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDE4E4] flex justify-around py-2 z-50">
-            <a href="/user/dashboard.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-chart-pie text-lg"></i><span>Dashboard</span></a>
-            <a href="/user/report.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-flag text-lg"></i><span>Report</span></a>
-            <a href="/user/appointments.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-calendar-check text-lg"></i><span>Appts</span></a>
-            <a href="/user/my-reports.html" class="flex flex-col items-center text-up text-[0.65rem]"><i class="fas fa-folder-open text-lg"></i><span>Reports</span></a>
-            <a href="#" id="mobileLogoutBtn" class="flex flex-col items-center text-[#B02B2B] text-[0.65rem]"><i class="fas fa-sign-out-alt text-lg"></i><span>Logout</span></a>
-        </div>
+    <!-- Mobile Bottom Nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDE4E4] flex justify-around py-2 z-50">
+        <a href="/user/dashboard.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-chart-pie text-lg"></i><span>Dashboard</span></a>
+        <a href="/user/report.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-flag text-lg"></i><span>Report</span></a>
+        <a href="/user/appointments.html" class="flex flex-col items-center text-[#6F5E5E] text-[0.65rem]"><i class="fas fa-calendar-check text-lg"></i><span>Appts</span></a>
+        <a href="/user/my-reports.html" class="flex flex-col items-center text-up text-[0.65rem]"><i class="fas fa-folder-open text-lg"></i><span>Reports</span></a>
+        <a href="#" id="mobileLogoutBtn" class="flex flex-col items-center text-[#B02B2B] text-[0.65rem]"><i class="fas fa-sign-out-alt text-lg"></i><span>Logout</span></a>
+    </div>
 
-        <script src="js/me.js"></script>
-        <script src="../js/policy.js"></script>
-        <script src="js/law-mapper.js"></script>
-        <script src="js/myreports.js"></script>
+    <script src="js/me.js"></script>
+    <script src="../js/policy.js"></script>
+    <script src="js/law-mapper.js"></script>
+    <script src="js/myreports.js"></script>
 
-        <style>
-            @media (max-width: 767px) {
-                main {
-                    padding-bottom: 5rem !important;
-                }
+    <style>
+        @media (max-width: 767px) {
+            main {
+                padding-bottom: 5rem !important;
             }
-        </style>
-    </body>
-    </html>
+        }
+    </style>
+</body>
+</html>

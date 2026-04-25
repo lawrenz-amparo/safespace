@@ -42,14 +42,22 @@
 </head>
 <body class="bg-[#FCFAFA] text-[#1A1E24] min-h-screen flex flex-col">
 
-    <!-- Fixed header (updated to UPLB OASH) -->
+    <!-- Fixed header (updated to UPLB OASH with logos) -->
     <header class="fixed top-0 w-full bg-white/90 backdrop-blur-sm border-b border-[#EDE4E4] z-50">
         <div class="max-w-7xl mx-auto px-5 sm:px-8">
             <div class="flex items-center justify-between h-16">
+                <!-- Logo section with UPLB + OASH -->
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-md bg-up flex items-center justify-center"><i class="fas fa-shield-alt text-white text-sm"></i></div>
-                    <span class="font-semibold text-up text-lg tracking-tight">UPLB OASH</span>
+                    <!-- UPLB Logo -->
+                    <img src="UPLB-logo.jpg" alt="UPLB Logo" class="h-8 w-auto">
+                    <!-- Subtle divider -->
+                    <div class="w-px h-6 bg-[#D4C5C5] hidden sm:block"></div>
+                    <!-- OASH Logo (replaces shield icon) -->
+                    <img src="Oash-logo.jpg" alt="OASH Logo" class="h-8 w-auto">
+                    <!-- Wordmark -->
+                    <span class="font-semibold text-[#6F1A1F] text-lg tracking-tight hidden sm:inline">UPLB OASH</span>
                 </div>
+
                 <nav class="hidden md:flex items-center gap-9 text-sm font-medium">
                     <a href="/" class="nav-link">Home</a>
                     <a href="/report.html" class="nav-link active">Analyze Incident</a>
@@ -252,7 +260,14 @@
     <footer class="bg-white border-t border-[#EDE4E4] py-12">
         <div class="max-w-7xl mx-auto px-5 sm:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-sm">
-                <div><div class="flex items-center gap-2 mb-4"><div class="w-7 h-7 rounded bg-up flex items-center justify-center"><i class="fas fa-shield-alt text-white text-xs"></i></div><span class="font-semibold text-up">UPLB OASH</span></div><p class="text-[#706565] text-xs leading-relaxed">Office of Anti-Sexual Harassment · UPLB</p></div>
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <!-- OASH logo in footer (replaces shield) -->
+                        <img src="Oash-logo.jpg" alt="OASH Logo" class="h-7 w-auto">
+                        <span class="font-semibold text-up">UPLB OASH</span>
+                    </div>
+                    <p class="text-[#706565] text-xs leading-relaxed">Office of Anti-Sexual Harassment · UPLB</p>
+                </div>
                 <div><h4 class="font-medium text-[#3D3434] mb-3">Pages</h4><ul class="space-y-2 text-[#706565]"><li><a href="/" class="hover:text-up">Home</a></li><li><a href="/law-repository.html" class="hover:text-up">Law repository</a></li></ul></div>
                 <div><h4 class="font-medium text-[#3D3434] mb-3">Policies</h4><ul class="space-y-2 text-[#706565]"><li>Privacy notice</li><li>Terms of use</li><li>UP Data protection</li></ul></div>
                 <div><h4 class="font-medium text-[#3D3434] mb-3">Contact</h4><ul class="space-y-2 text-[#706565]"><li><i class="fas fa-phone mr-2 text-up/60 text-xs"></i>+63 49 501 1844</li><li><i class="fas fa-envelope mr-2 text-up/60 text-xs"></i>oash.uplb@up.edu.ph</li></ul></div>
