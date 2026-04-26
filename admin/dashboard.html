@@ -278,7 +278,7 @@
                     </div>
                 </div>
 
-                <!-- NEW SECTION: Cases by Category and Offense Level -->
+                <!-- SECTION: Cases by Category and Offense Level -->
                 <div class="grid lg:grid-cols-2 gap-4 md:gap-6 mb-6">
                     <!-- Cases by Category Card -->
                     <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5">
@@ -313,7 +313,7 @@
                     </div>
                 </div>
 
-                <!-- NEW SECTION: Monthly Reports -->
+                <!-- SECTION: Monthly Reports -->
                 <div class="grid grid-cols-1 gap-4 md:gap-6 mb-6">
                     <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5">
                         <div class="flex items-center justify-between mb-4">
@@ -329,6 +329,25 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- NEW: Location Hotspots Card (required for dashboard.js) -->
+                <div class="grid grid-cols-1 gap-4 md:gap-6 mb-6">
+                    <div class="bg-white rounded-xl border border-[#EDE4E4] shadow-card p-4 md:p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-semibold text-[#2A2424] flex items-center gap-2 text-sm md:text-base">
+                                <i class="fas fa-map-marker-alt text-up"></i> Hotspots by Exact Location
+                            </h2>
+                            <span class="text-xs bg-up-muted text-up px-3 py-1 rounded-full">top incident places</span>
+                        </div>
+                        <div id="locationHotspotContainer" style="min-height: 320px;">
+                            <div class="text-center py-8">
+                                <div class="loading-spinner mx-auto mb-3"></div>
+                                <p class="text-xs text-[#8F7E7E]">Loading location data...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>

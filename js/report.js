@@ -188,7 +188,7 @@
 
     // Call backend API
     async function callHarassmentAPI(description) {
-        const API_URL = 'http://178.128.114.206/predict';
+        const API_URL = '/api/predict';
         
         const requestBody = {
             description: description

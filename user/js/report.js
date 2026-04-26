@@ -316,9 +316,9 @@ function updateApplicableLaws() {
 
 async function predictHarassment(description) {
     try {
-        const response = await fetch('http://178.128.114.206/predict', {
+        const response = await fetch('/api/predict', {  // ✅ relative path, no IP
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ description })
         });
         if (!response.ok) throw new Error('Prediction API request failed');

@@ -15,6 +15,7 @@ let barChart = null;
 let monthlyChart = null;
 let categoryChart = null;
 let offenseChart = null;
+let locationChart = null;   // for location hotspot bar chart
 
 // Helper Functions
 function getAuthToken() {
@@ -299,6 +300,83 @@ function renderCasesByOffense(casesByOffenseLevel) {
     }
 }
 
+// NEW: Render location hotspots (horizontal bar chart)
+function renderLocationHotspots(locationsData) {
+    const container = document.getElementById('locationHotspotContainer');
+    if (!locationsData || locationsData.length === 0) {
+        container.innerHTML = '<div class="text-center py-8"><p class="text-sm text-gray-500">No location data available</p></div>';
+        return;
+    }
+
+    // Sort descending and take top 10 for readability
+    const sorted = [...locationsData].sort((a, b) => b.count - a.count);
+    const topLocations = sorted.slice(0, 10);
+    const labels = topLocations.map(item => item.location);
+    const counts = topLocations.map(item => item.count);
+
+    // Create or reuse canvas
+    let canvas = document.getElementById('locationBarChartCanvas');
+    if (!canvas) {
+        container.innerHTML = '<canvas id="locationBarChartCanvas" style="width:100%; height:280px;"></canvas>';
+        canvas = document.getElementById('locationBarChartCanvas');
+    }
+    const ctx = canvas.getContext('2d');
+
+    // Destroy previous chart instance if exists
+    if (locationChart) locationChart.destroy();
+
+    locationChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of reports',
+                data: counts,
+                backgroundColor: '#6F1A1F',
+                borderRadius: 6,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            indexAxis: 'y',  // horizontal bar chart – easier to read location names
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw} reports`;
+                        }
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Number of reports',
+                        color: '#8F7E7E',
+                        font: { size: 11 }
+                    },
+                    grid: { color: '#F0E4E4' },
+                    beginAtZero: true
+                },
+                y: {
+                    ticks: {
+                        font: { size: 11 },
+                        autoSkip: false
+                    },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
 // Update line chart with reports data
 function updateLineChart(reportsData) {
     const ctx = document.getElementById('reportsLineChart').getContext('2d');
@@ -515,6 +593,18 @@ async function fetchDashboardData() {
             renderCasesByCategory(data.casesByCategory);
             renderCasesByOffense(data.casesByOffenseLevel);
             updateMonthlyChart(data.monthlyReports);
+            
+            // NEW: Render location hotspots if data is provided
+            if (data.casesByLocation && Array.isArray(data.casesByLocation)) {
+                renderLocationHotspots(data.casesByLocation);
+            } else {
+                // Optionally show a message or mock data for testing
+                console.warn("No casesByLocation data from API.");
+                const locationContainer = document.getElementById('locationHotspotContainer');
+                if (locationContainer) {
+                    locationContainer.innerHTML = '<div class="text-center py-8"><p class="text-sm text-gray-500">No location data available. Please ensure backend returns casesByLocation.</p></div>';
+                }
+            }
             
         } else {
             throw new Error('Failed to load dashboard data');
