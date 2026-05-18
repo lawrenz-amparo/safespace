@@ -4,39 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UPLB OASH — home</title>
-    <!-- Inter font - professional, clean, widely used in modern dashboards -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 (icons only) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Tailwind with Inter as default -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'] },
                     colors: {
-                        up: {
-                            DEFAULT: '#6F1A1F', // UP Maroon (more muted, professional)
-                            light: '#8E3A3F',
-                            dark: '#510E12',
-                            muted: '#F1E4E5',
-                        }
+                        up: { DEFAULT: '#6F1A1F', light: '#8E3A3F', dark: '#510E12', muted: '#F1E4E5' }
                     },
                     boxShadow: {
                         'subtle': '0 4px 12px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.05)',
-                        'card': '0 8px 24px -8px rgba(111,26,31,0.08)',
+                        'card': '0 8px 24px -8px rgba(111,26,31,0.08)'
                     }
                 }
             }
         }
     </script>
     <style>
-        /* smooth scrolling only, no gimmicks */
         html { scroll-behavior: smooth; }
         body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
         .nav-link { position: relative; color: #374151; transition: color 0.2s; }
@@ -62,43 +51,33 @@
 </head>
 <body class="bg-[#FCFAFA] text-[#1A1E24]">
 
-    <!-- Fixed header - clean, minimal -->
     <header class="fixed top-0 w-full bg-white/90 backdrop-blur-sm border-b border-[#EDE4E4] z-50">
         <div class="max-w-7xl mx-auto px-5 sm:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Logo + wordmark with both logos -->
                 <div class="flex items-center gap-2.5">
-                    <!-- UPLB Logo -->
                     <img src="UPLB-logo.jpg" alt="UPLB Logo" class="h-8 w-auto">
-                    <!-- Subtle divider -->
                     <div class="w-px h-6 bg-[#D4C5C5] hidden sm:block"></div>
-                    <!-- OASH Logo (replaces shield icon) -->
                     <img src="Oash-logo.jpg" alt="OASH Logo" class="h-8 w-auto">
-                    <!-- Wordmark -->
-                    <span class="font-semibold text-[#6F1A1F] text-lg tracking-tight hidden sm:inline">UPLB OASH</span>
+                    <span class="font-semibold text-up text-lg tracking-tight hidden sm:inline">UPLB OASH</span>
                 </div>
 
-                <!-- Desktop navigation -->
                 <nav class="hidden md:flex items-center gap-9 text-sm font-medium">
                     <a href="/" class="nav-link active" aria-current="page">Home</a>
                     <a href="/report.html" class="nav-link">Analyze Incident</a>
                     <a href="/law-repository.html" class="nav-link">Law repository</a>
                 </nav>
 
-                <!-- Desktop auth -->
                 <div class="hidden md:flex items-center gap-3">
                     <a href="/login.html" class="text-sm font-medium text-[#4B5563] hover:text-up px-4 py-2 transition-colors">Log in</a>
                     <a href="/register.html" class="bg-up text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-up-light transition-colors shadow-subtle">Register</a>
                 </div>
 
-                <!-- Mobile menu button -->
                 <button class="md:hidden text-[#4B5563] p-2" id="menuBtn" aria-label="menu">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile menu dropdown (hidden by default) -->
         <div class="md:hidden hidden bg-white border-t border-[#EDE4E4] py-3 px-5" id="mobileMenu">
             <div class="flex flex-col space-y-3">
                 <a href="/" class="py-2 text-up font-medium border-b border-[#F0E4E4] flex items-center gap-3"><i class="fas fa-home w-5 text-up/70"></i>Home</a>
@@ -113,11 +92,9 @@
     </header>
 
     <main class="pt-16">
-        <!-- Hero section – clean typography, no over-animation -->
         <section class="border-b border-[#EDE4E4] bg-white">
             <div class="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-20">
                 <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <!-- left -->
                     <div>
                         <div class="inline-flex items-center gap-2 bg-[#F4EBEB] px-3 py-1.5 rounded-full text-up text-xs font-medium mb-5">
                             <span class="w-1.5 h-1.5 bg-up rounded-full"></span>
@@ -137,10 +114,9 @@
                                 <i class="fas fa-gavel"></i> Browse laws
                             </a>
                         </div>
-                        <!-- subtle stats -->
                         <div class="grid grid-cols-3 gap-5 mt-12">
                             <div>
-                                <div class="stat-value text-up">50+</div>
+                                <div class="stat-value text-up" id="totalReportsStat">50</div>
                                 <div class="text-xs text-[#6F5E5E] uppercase tracking-wider">Reports</div>
                             </div>
                             <div>
@@ -153,7 +129,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- right: classifier card (data-focused) -->
                     <div class="classifier-card rounded-xl p-6 shadow-card">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-xs font-medium text-up bg-up-muted px-3 py-1 rounded-full">AI CLASSIFIER · DEMO</span>
@@ -168,7 +143,6 @@
                                 <span class="text-xs bg-[#EDE1E1] px-2 py-0.5 rounded-full">confidence 0.77</span>
                             </div>
                             <div class="mt-2 text-lg font-semibold text-up">Not Harassment</div>
-                            <!-- probability bars -->
                             <div class="mt-4 space-y-2.5">
                                 <div>
                                     <div class="flex justify-between text-xs text-[#5E4F4F] mb-1"><span>Physical</span><span>0.053</span></div>
@@ -200,7 +174,6 @@
             </div>
         </section>
 
-        <!-- Features grid – simple cards, each linking to a page -->
         <section class="py-20 bg-[#FCFAFA]">
             <div class="max-w-7xl mx-auto px-5 sm:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-14">
@@ -208,7 +181,6 @@
                     <p class="text-[#655A5A] text-sm mt-3">Built for UPLB students, faculty, and staff.</p>
                 </div>
                 <div class="grid md:grid-cols-3 gap-6">
-                    <!-- File a report card -->
                     <div class="bg-white p-7 rounded-xl border border-[#EEE5E5] card-hover">
                         <div class="w-11 h-11 rounded-lg bg-up-muted flex items-center justify-center mb-5">
                             <i class="fas fa-pen-to-square text-up text-xl"></i>
@@ -219,7 +191,6 @@
                             Analyze Incident <i class="fas fa-arrow-right text-xs"></i>
                         </a>
                     </div>
-                    <!-- Appointments card -->
                     <div class="bg-white p-7 rounded-xl border border-[#EEE5E5] card-hover">
                         <div class="w-11 h-11 rounded-lg bg-up-muted flex items-center justify-center mb-5">
                             <i class="fas fa-calendar-check text-up text-xl"></i>
@@ -230,7 +201,6 @@
                             Schedule <i class="fas fa-arrow-right text-xs"></i>
                         </a>
                     </div>
-                    <!-- Law repository card -->
                     <div class="bg-white p-7 rounded-xl border border-[#EEE5E5] card-hover">
                         <div class="w-11 h-11 rounded-lg bg-up-muted flex items-center justify-center mb-5">
                             <i class="fas fa-scale-balanced text-up text-xl"></i>
@@ -245,7 +215,6 @@
             </div>
         </section>
 
-        <!-- Testimonial / trust section (very minimal) -->
         <section class="border-y border-[#EDE4E4] bg-white">
             <div class="max-w-3xl mx-auto px-5 py-16 text-center">
                 <i class="fas fa-quote-right text-4xl text-up/20 mb-5"></i>
@@ -260,7 +229,6 @@
             </div>
         </section>
 
-        <!-- CTA - simple, no gimmicks -->
         <section class="py-16 bg-up">
             <div class="max-w-2xl mx-auto text-center px-5">
                 <h2 class="text-2xl md:text-3xl font-semibold text-white">Create an account with E-Mail</h2>
@@ -274,13 +242,11 @@
         </section>
     </main>
 
-    <!-- Footer – clean, with proper pages links -->
     <footer class="bg-white border-t border-[#EDE4E4] py-12">
         <div class="max-w-7xl mx-auto px-5 sm:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-sm">
                 <div>
                     <div class="flex items-center gap-2 mb-4">
-                        <!-- OASH logo in footer -->
                         <img src="Oash-logo.jpg" alt="OASH Logo" class="h-7 w-auto">
                         <span class="font-semibold text-up">UPLB OASH</span>
                     </div>
@@ -315,9 +281,9 @@
         </div>
     </footer>
 
-    <!-- Simple mobile menu toggle -->
     <script>
         (function() {
+            // Mobile menu toggle
             const menuBtn = document.getElementById('menuBtn');
             const mobileMenu = document.getElementById('mobileMenu');
             if (menuBtn && mobileMenu) {
@@ -325,15 +291,44 @@
                     e.stopPropagation();
                     mobileMenu.classList.toggle('hidden');
                 });
-                // close if click outside (optional)
                 document.addEventListener('click', function(event) {
                     if (!menuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
                         mobileMenu.classList.add('hidden');
                     }
                 });
             }
+
+            // Fetch total report count dynamically
+            async function fetchTotalReports() {
+                const statElement = document.getElementById('totalReportsStat');
+                if (!statElement) return;
+                // Keep the static default (50+ already in HTML)
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+                    const response = await fetch('https://safespace-back.onrender.com/api/v1/public/stats/total-reports', {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const total = data.data?.totalReports ?? data.totalReports;
+                        if (typeof total === 'number') {
+                            statElement.textContent = total >= 1000 ? Math.floor(total / 1000) + 'k+' : total;
+                            return;
+                        }
+                    }
+                    // If fetch fails, keep the existing static value (already 50+)
+                    console.debug('Could not fetch total reports, keeping default.');
+                } catch (error) {
+                    console.debug('Error fetching total reports:', error);
+                    // keep default
+                }
+            }
+            fetchTotalReports();
         })();
     </script>
-    <!-- No AOS, no heavy animations – just clean UI -->
 </body>
 </html>

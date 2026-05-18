@@ -1,4 +1,4 @@
-// report.js – Full version with "Not Harassment" → "Not Sexual Harassment" normalization
+// report.js – Dynamic sorting of probabilities (highest first)
 (function() {
     'use strict';
 
@@ -35,7 +35,7 @@
         return (value * 100).toFixed(2);
     }
 
-    // Get classification description (renamed from severity)
+    // Get classification description
     function getClassificationDescription(classificationLabel) {
         switch(classificationLabel) {
             case 'Grave':
@@ -49,7 +49,7 @@
         }
     }
 
-    // Add classification badge to the result panel (renamed from addSeverityBadge)
+    // Add classification badge to the result panel
     function addClassificationBadge(classificationLabel, classificationConfidence) {
         const badgeContainer = document.getElementById('classificationLevelContainer');
         if (!badgeContainer) return;
@@ -92,13 +92,12 @@
         `;
     }
 
-    // Update UI with classification results
+    // Update UI with classification results – with sorted probabilities
     function updateResultUI(apiResponse, descriptionText) {
         const offenseData = apiResponse.offense;
         const severityData = apiResponse.severity;
         
         const offenseProbs = offenseData.probabilities;
-        // Normalize the offense label
         const offenseLabel = normalizeOffenseLabel(offenseData.label);
         const offenseConfidence = offenseData.confidence;
         
@@ -112,38 +111,60 @@
         harassmentTypeResult.innerHTML = `${offenseLabel}`;
         confidenceText.innerHTML = `Confidence: ${formatPercent(offenseConfidence)}% | Classification: ${severityLabel} (${formatPercent(severityConfidence)}%)`;
         
-        // Update probability values (use normalized key for "Not Sexual Harassment")
-        document.getElementById('probPhyVal').innerHTML = formatProb(offenseProbs["Physical Harassment"] || 0);
-        document.getElementById('probVerbVal').innerHTML = formatProb(offenseProbs["Verbal Harassment"] || 0);
-        document.getElementById('probNonvVal').innerHTML = formatProb(offenseProbs["Non-Verbal Harassment"] || 0);
-        document.getElementById('probNotVal').innerHTML = formatProb(offenseProbs["Not Sexual Harassment"] || offenseProbs["Not Harassment"] || 0);
-        document.getElementById('probCybVal').innerHTML = formatProb(offenseProbs["Cyber Sexual Harassment"] || 0);
-        
-        // Update progress bars
-        document.getElementById('probPhyBar').style.width = ((offenseProbs["Physical Harassment"] || 0) * 100) + '%';
-        document.getElementById('probVerbBar').style.width = ((offenseProbs["Verbal Harassment"] || 0) * 100) + '%';
-        document.getElementById('probNonvBar').style.width = ((offenseProbs["Non-Verbal Harassment"] || 0) * 100) + '%';
-        document.getElementById('probNotBar').style.width = ((offenseProbs["Not Sexual Harassment"] || offenseProbs["Not Harassment"] || 0) * 100) + '%';
-        document.getElementById('probCybBar').style.width = ((offenseProbs["Cyber Sexual Harassment"] || 0) * 100) + '%';
-        
         // Update description
         const shortDesc = descriptionText.length > 280 ? descriptionText.substring(0, 277) + '...' : descriptionText;
         document.getElementById('resultDescription').innerHTML = `“${escapeHtml(shortDesc)}”`;
         
-        // Add classification badge
+        // --- Sort probabilities descending ---
+        const sortedEntries = Object.entries(offenseProbs)
+            .map(([key, val]) => {
+                let displayKey = key === 'Not Harassment' ? 'Not Sexual Harassment' : key;
+                return { label: displayKey, value: val };
+            })
+            .sort((a, b) => b.value - a.value);
+        
+        const probContainer = document.querySelector('#resultPanel .bg-\\[\\#F9F4F4\\] .space-y-3.text-xs');
+        if (probContainer) {
+            probContainer.innerHTML = '';
+            sortedEntries.forEach(({ label, value }) => {
+                const barClass = label === 'Not Sexual Harassment' ? 'bg-gray-400' : 'bg-up';
+                const row = document.createElement('div');
+                row.innerHTML = `
+                    <div class="flex justify-between mb-1">
+                        <span>${label}</span>
+                        <span class="prob-value">${formatProb(value)}</span>
+                    </div>
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full ${barClass} rounded-full prob-bar" style="width: ${value * 100}%"></div>
+                    </div>
+                `;
+                probContainer.appendChild(row);
+            });
+        } else {
+            // Fallback to static IDs if container not found
+            document.getElementById('probPhyVal').innerHTML = formatProb(offenseProbs["Physical Harassment"] || 0);
+            document.getElementById('probVerbVal').innerHTML = formatProb(offenseProbs["Verbal Harassment"] || 0);
+            document.getElementById('probNonvVal').innerHTML = formatProb(offenseProbs["Non-Verbal Harassment"] || 0);
+            document.getElementById('probNotVal').innerHTML = formatProb(offenseProbs["Not Sexual Harassment"] || offenseProbs["Not Harassment"] || 0);
+            document.getElementById('probCybVal').innerHTML = formatProb(offenseProbs["Cyber Sexual Harassment"] || 0);
+            
+            document.getElementById('probPhyBar').style.width = ((offenseProbs["Physical Harassment"] || 0) * 100) + '%';
+            document.getElementById('probVerbBar').style.width = ((offenseProbs["Verbal Harassment"] || 0) * 100) + '%';
+            document.getElementById('probNonvBar').style.width = ((offenseProbs["Non-Verbal Harassment"] || 0) * 100) + '%';
+            document.getElementById('probNotBar').style.width = ((offenseProbs["Not Sexual Harassment"] || offenseProbs["Not Harassment"] || 0) * 100) + '%';
+            document.getElementById('probCybBar').style.width = ((offenseProbs["Cyber Sexual Harassment"] || 0) * 100) + '%';
+        }
+        
         addClassificationBadge(severityLabel, severityConfidence);
         
-        // Store AI result for later use (with normalized category)
         currentAiResult = {
-            category: offenseLabel, // already normalized
+            category: offenseLabel,
             severity: severityLabel
         };
         
-        // Map laws with the AI result
         mapLawsWithAI();
     }
 
-    // Map laws using the stored AI result
     function mapLawsWithAI() {
         if (window.LawMapper && window.LawMapper.analyzeAndDisplayLaws && currentAiResult) {
             window.LawMapper.analyzeAndDisplayLaws(currentAiResult);
@@ -152,7 +173,6 @@
         }
     }
 
-    // Simple escape to prevent XSS
     function escapeHtml(str) {
         return str.replace(/[&<>]/g, function(m) {
             if (m === '&') return '&amp;';
@@ -164,7 +184,6 @@
         });
     }
 
-    // Show error message
     function showError(message) {
         const errorDiv = document.getElementById('errorMessage');
         errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ${escapeHtml(message)}`;
@@ -174,7 +193,6 @@
         }, 5000);
     }
 
-    // Loading state
     function setLoading(isLoading) {
         const submitBtn = document.getElementById('submitBtn');
         if (isLoading) {
@@ -186,13 +204,9 @@
         }
     }
 
-    // Call backend API
     async function callHarassmentAPI(description) {
-        const API_URL = '/api/predict';
-        
-        const requestBody = {
-            description: description
-        };
+        const API_URL = 'http://178.128.114.206/predict';
+        const requestBody = { description: description };
         
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -214,15 +228,12 @@
         
         const result = await response.json();
         
-        // Validate expected fields
         if (!result.offense || !result.severity) {
             throw new Error('Invalid response structure from server. Expected offense and severity objects.');
         }
-        
         if (!result.offense.probabilities || !result.offense.label || result.offense.confidence === undefined) {
             throw new Error('Invalid offense data structure from server');
         }
-        
         if (!result.severity.probabilities || !result.severity.label || result.severity.confidence === undefined) {
             throw new Error('Invalid severity data structure from server');
         }
@@ -230,7 +241,6 @@
         return result;
     }
 
-    // Validate form fields before submission
     function validateForm() {
         const victimClass = document.getElementById('victimClass').value;
         const perpClass = document.getElementById('perpClass').value;
@@ -258,24 +268,19 @@
             showError('Please select relationship with the respondent');
             return false;
         }
-        
         return true;
     }
 
     async function translateToEnglish(text) {
         if (!text.trim()) return text;
-        
         try {
             const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=tl&tl=en&dt=t&q=${encodeURIComponent(text)}`;
             const response = await fetch(url);
             const data = await response.json();
-            
             if (data && data[0]) {
                 let translatedText = '';
                 for (let i = 0; i < data[0].length; i++) {
-                    if (data[0][i][0]) {
-                        translatedText += data[0][i][0];
-                    }
+                    if (data[0][i][0]) translatedText += data[0][i][0];
                 }
                 return translatedText || text;
             }
@@ -286,46 +291,27 @@
         }
     }
 
-    // Handle form submission
     document.getElementById('reportForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
         const description = document.getElementById('incident-description').value.trim();
         const resultPanel = document.getElementById('resultPanel');
         const errorDiv = document.getElementById('errorMessage');
-        
-        // Hide previous error
         errorDiv.classList.add('hidden');
         
         if (!description) {
             showError('Please describe the incident before submitting.');
             return;
         }
+        if (!validateForm()) return;
         
-        // Validate legal context fields
-        if (!validateForm()) {
-            return;
-        }
-        
-        // Show loading state
         setLoading(true);
-        
         try {
             const translatedDescription = await translateToEnglish(description);
             console.log("Translated Text: ", translatedDescription);
-
-            // Call actual API endpoint
             const apiResult = await callHarassmentAPI(translatedDescription);
-            
-            // Update UI with real classification
             updateResultUI(apiResult, description);
-            
-            // Show result panel
             resultPanel.classList.remove('hidden');
-            
-            // Smooth scroll to result
             resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
         } catch (error) {
             console.error('Classification error:', error);
             showError(`Classification failed: ${error.message}. Make sure the backend server is running at http://178.128.114.206/predict`);
@@ -335,95 +321,65 @@
         }
     });
 
-    // Reset/Clear button
     document.getElementById('resetBtn').addEventListener('click', function() {
         document.getElementById('incident-description').value = '';
         document.getElementById('resultPanel').classList.add('hidden');
         document.getElementById('errorMessage').classList.add('hidden');
         
-        // Reset radio buttons
         const victimRadio = document.querySelectorAll('input[name="victimUP"]');
         const perpRadio = document.querySelectorAll('input[name="perpUP"]');
         victimRadio.forEach(radio => radio.checked = false);
         perpRadio.forEach(radio => radio.checked = false);
         
-        // Reset selects to placeholder
         const victimSelect = document.getElementById('victimClass');
         const perpSelect = document.getElementById('perpClass');
         const relationshipSelect = document.getElementById('relationship');
         const locationSelect = document.getElementById('incidentLocation');
-        
         if (victimSelect) victimSelect.value = '';
         if (perpSelect) perpSelect.value = '';
         if (relationshipSelect) relationshipSelect.value = '';
         if (locationSelect) locationSelect.value = '';
         
-        // Clear classification badge container (new ID)
         const classificationContainer = document.getElementById('classificationLevelContainer');
-        if (classificationContainer) {
-            classificationContainer.innerHTML = '';
-        }
+        if (classificationContainer) classificationContainer.innerHTML = '';
         
-        // Clear laws container
         const lawsContainer = document.getElementById('applicableLawsContainer');
-        if (lawsContainer) {
-            lawsContainer.innerHTML = '<!-- Laws will be populated here -->';
-        }
+        if (lawsContainer) lawsContainer.innerHTML = '<!-- Laws will be populated here -->';
         
-        // Clear stored AI result
         currentAiResult = null;
     });
 
-    // Listen for relationship options updates to re-map laws if needed
     document.addEventListener('relationshipOptionsUpdated', function() {
         const resultPanel = document.getElementById('resultPanel');
-        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
-            mapLawsWithAI();
-        }
+        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) mapLawsWithAI();
     });
     
     document.addEventListener('complainedOptionsUpdated', function() {
         const resultPanel = document.getElementById('resultPanel');
-        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
-            mapLawsWithAI();
-        }
+        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) mapLawsWithAI();
     });
     
-    // Also listen for changes to form fields to update laws dynamically
     const formFields = ['victimClass', 'perpClass', 'relationship', 'incidentLocation'];
     formFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
             field.addEventListener('change', function() {
                 const resultPanel = document.getElementById('resultPanel');
-                if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
-                    mapLawsWithAI();
-                }
+                if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) mapLawsWithAI();
             });
         }
     });
     
-    // Listen for radio button changes
     const victimRadios = document.querySelectorAll('input[name="victimUP"]');
     const perpRadios = document.querySelectorAll('input[name="perpUP"]');
-    
-    victimRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            const resultPanel = document.getElementById('resultPanel');
-            if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
-                mapLawsWithAI();
-            }
-        });
-    });
-    
-    perpRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            const resultPanel = document.getElementById('resultPanel');
-            if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) {
-                mapLawsWithAI();
-            }
-        });
-    });
+    victimRadios.forEach(radio => radio.addEventListener('change', function() {
+        const resultPanel = document.getElementById('resultPanel');
+        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) mapLawsWithAI();
+    }));
+    perpRadios.forEach(radio => radio.addEventListener('change', function() {
+        const resultPanel = document.getElementById('resultPanel');
+        if (resultPanel && !resultPanel.classList.contains('hidden') && currentAiResult) mapLawsWithAI();
+    }));
 
-    console.log('Report.js initialized');
+    console.log('Report.js initialized (sorted probabilities)');
 })();
