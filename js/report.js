@@ -341,7 +341,7 @@
             
         } catch (error) {
             console.error('Classification error:', error);
-            showError(`Classification failed: ${error.message}. Make sure the backend server is running at http://178.128.114.206/predict`);
+            showError(`Classification failed: ${error.message}. The AI prediction service may be offline`);
             resultPanel.classList.add('hidden');
         } finally {
             setLoading(false);
