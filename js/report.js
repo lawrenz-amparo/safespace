@@ -200,7 +200,7 @@
 
     // Call backend API
     async function callHarassmentAPI(description) {
-        const API_URL = '/api/predict';
+        const API_URL = 'http://127.0.0.1:7860/predict'; // model running on this computer (run.bat in safespace-ml)
         // const API_URL = 'http://178.128.114.206/predict';
         
         const requestBody = {
@@ -341,7 +341,7 @@
             
         } catch (error) {
             console.error('Classification error:', error);
-            showError(`Classification failed: ${error.message}. The AI prediction service may be offline`);
+            showError(`Classification failed: ${error.message}. Make sure the AI model is running on this computer (run.bat)`);
             resultPanel.classList.add('hidden');
         } finally {
             setLoading(false);

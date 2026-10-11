@@ -402,7 +402,7 @@ function updateApplicableLaws() {
 
 async function predictHarassment(description) {
     try {
-        const response = await fetch('/api/predict', {
+        const response = await fetch('http://127.0.0.1:7860/predict', { // model running on this computer (run.bat in safespace-ml)
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
