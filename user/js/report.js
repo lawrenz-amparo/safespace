@@ -345,7 +345,7 @@ function collectFormData() {
 
 function validateForm(data) {
     const required = [
-        'firstName', 'middleName', 'lastName', 'age', 'biologicalSex', 'identifiedAs',
+        'firstName', 'lastName', 'age', 'biologicalSex', 'identifiedAs',
         'civilStatus', 'mobileNumber', 'presentAddress', 'permanentAddress',
         'classification', 'college', 'department', 'victimConstituent',
         'complainedFullName', 'complainedSex', 'complainedClassification', 
