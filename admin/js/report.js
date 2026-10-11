@@ -118,6 +118,28 @@ async function fetchReports(page = 1) {
     }
 }
 
+// Permanently delete a report (admin only)
+window.deleteReport = async function(reportId) {
+    if (!confirm('Delete this report permanently? This cannot be undone.')) return;
+    const token = getAuthToken();
+    if (!token) { if (typeof toast !== 'undefined') toast.error('Auth required', 'Please login.'); return; }
+    try {
+        const response = await fetch(`https://safespace-back.onrender.com/api/v1/admin/report/${reportId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (response.ok && result.success) {
+            if (typeof toast !== 'undefined') toast.success('Deleted', 'Report deleted');
+            fetchReports(currentPage);
+        } else {
+            if (typeof toast !== 'undefined') toast.error('Delete failed', result.message || 'Could not delete report');
+        }
+    } catch (err) {
+        if (typeof toast !== 'undefined') toast.error('Network error', 'Please check connection');
+    }
+};
+
 // Combined update API call (status and/or offenseLevel)
 async function updateReport(reportId, updateData) {
     const token = getAuthToken();
@@ -208,7 +230,10 @@ function renderDesktop() {
                             <option value="resolved" ${r.status === 'resolved' ? 'selected' : ''}>Resolved</option>
                         </select>
                     </td>
-                    <td><button class="action-btn" onclick="viewReportDetails('${r.reportId || r.id}')"><i class="fas fa-eye"></i> View</button></td>
+                    <td>
+                        <button class="action-btn" onclick="viewReportDetails('${r.reportId || r.id}')"><i class="fas fa-eye"></i> View</button>
+                        <button class="action-btn" style="color:#b91c1c" onclick="deleteReport('${r.reportId || r.id}')"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
                  </tr>
             `;
         }).join('');
@@ -249,7 +274,7 @@ function renderMobile() {
                         </select>
                     </span></div>
                     <div class="report-card-row"><span class="report-card-label">Procedure</span><span class="report-card-value">${r.procedure}</span></div>
-                    <div class="mt-3 text-right"><button class="text-up text-sm font-medium" onclick="viewReportDetails('${r.reportId || r.id}')"><i class="fas fa-eye mr-1"></i> View Details</button></div>
+                    <div class="mt-3 text-right"><button class="text-up text-sm font-medium" onclick="viewReportDetails('${r.reportId || r.id}')"><i class="fas fa-eye mr-1"></i> View Details</button> <button class="text-sm font-medium ml-3" style="color:#b91c1c" onclick="deleteReport('${r.reportId || r.id}')"><i class="fas fa-trash mr-1"></i> Delete</button></div>
                 </div>
             `;
         }).join('');
